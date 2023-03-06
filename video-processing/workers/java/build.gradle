@@ -1,0 +1,89 @@
+plugins {
+    id 'org.springframework.boot' version '2.5.5'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
+    id 'maven-publish'
+}
+
+ext {
+    appVersion = '1.0-SNAPSHOT'
+    versions = [
+            orkesClient: '1.0.2',
+            guava      : '31.0.1-jre',
+            im4java    : '1.4.0',
+            log4j      : '2.17.1!!',
+            protobuf   : '3.19.4',
+            awsSdkBom  : '1.12+'
+    ]
+}
+
+group 'io.orkes.samples'
+version "${appVersion}"
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://orkes-artifacts-repo.s3.amazonaws.com/snapshots/'
+        content {
+            includeGroup 'io.orkes.conductor'
+        }
+    }
+    maven {
+        url = uri('https://repo.maven.apache.org/maven2/')
+    }
+
+}
+
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter'
+
+    implementation "org.apache.logging.log4j:log4j-api:${versions.log4j}"
+    implementation "org.apache.logging.log4j:log4j-core:${versions.log4j}"
+    implementation "org.apache.logging.log4j:log4j-jul:${versions.log4j}"
+    implementation "org.apache.logging.log4j:log4j-to-slf4j:${versions.log4j}"
+    implementation "org.apache.logging.log4j:log4j-web:${versions.log4j}"
+
+    implementation "io.orkes.conductor:orkes-conductor-client:${versions.orkesClient}"
+    implementation 'com.netflix.conductor:conductor-common:3.8.1'
+    implementation 'com.netflix.conductor:conductor-client:3.8.1'
+
+    implementation "org.im4java:im4java:${versions.im4java}"
+    implementation "com.google.guava:guava:${versions.guava}"
+    implementation "com.google.protobuf:protobuf-java:${versions.protobuf}"
+    implementation 'org.apache.commons:commons-lang3'
+    implementation platform("com.amazonaws:aws-java-sdk-bom:${versions.awsSdkBom}")
+
+    implementation 'com.amazonaws:aws-java-sdk-s3'
+    implementation 'com.amazonaws:aws-java-sdk-sts'
+
+    implementation 'com.google.cloud:google-cloud-pubsub:1.100.0'
+    implementation 'com.google.apis:google-api-services-discovery:v1-rev123-1.25.0'
+    implementation 'com.google.apis:google-api-services-servicecontrol:v1-rev20191003-1.30.3'
+    implementation 'com.google.api-client:google-api-client:1.31.1'
+    implementation 'com.google.code.gson:gson:2.8.9'
+    implementation 'com.google.apis:google-api-services-cloudcommerceprocurement:v1-rev20210417-1.31.0'
+
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // test dependencies
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'junit:junit:4.13.1'
+    testImplementation 'com.google.truth:truth:1.0'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+configurations {
+    all {
+        exclude group: 'com.github.vmg.protogen', module: 'protogen-annotations'
+        exclude group: 'org.apache.logging.log4j', module: 'log4j-slf4j-impl'
+    }
+}
+

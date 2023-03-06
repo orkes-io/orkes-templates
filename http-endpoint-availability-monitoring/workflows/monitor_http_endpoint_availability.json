@@ -1,0 +1,111 @@
+{
+  "createTime": 1674857859309,
+  "updateTime": 1676789894108,
+  "name": "Monitor-HTTP-Endpoint-Availability",
+  "description": "Ping a URL for uptime check and notify multiple if its down",
+  "version": 2,
+  "tasks": [
+    {
+      "name": "call_endpoint",
+      "taskReferenceName": "call_endpoint",
+      "inputParameters": {
+        "http_request": {
+          "uri": "${workflow.input.endpoint_url}",
+          "method": "GET",
+          "connectionTimeOut": 3000,
+          "readTimeOut": 3000
+        }
+      },
+      "type": "HTTP",
+      "decisionCases": {},
+      "defaultCase": [],
+      "forkTasks": [],
+      "startDelay": 0,
+      "joinOn": [],
+      "optional": true,
+      "defaultExclusiveJoinTask": [],
+      "asyncComplete": false,
+      "loopOver": []
+    },
+    {
+      "name": "get_timestamp",
+      "taskReferenceName": "get_timestamp_ref",
+      "inputParameters": {
+        "expression": "(function () { return new Date().toJSON(); })();",
+        "evaluatorType": "javascript"
+      },
+      "type": "INLINE",
+      "decisionCases": {},
+      "defaultCase": [],
+      "forkTasks": [],
+      "startDelay": 0,
+      "joinOn": [],
+      "optional": false,
+      "defaultExclusiveJoinTask": [],
+      "asyncComplete": false,
+      "loopOver": []
+    },
+    {
+      "name": "status_code_notify",
+      "taskReferenceName": "status-code-decision",
+      "inputParameters": {
+        "switchCaseValue": "${call_endpoint.output.response.statusCode}"
+      },
+      "type": "SWITCH",
+      "decisionCases": {
+        "FAILED": [
+          {
+            "name": "notify_channels_sub_workflow",
+            "taskReferenceName": "notify_channels_sub_workflow_ref",
+            "inputParameters": {
+              "notification_message": "Monitor-HTTP-Endpoint-Availability notification from Orkes Conductor: ${workflow.input.endpoint_url} is down. Timestamp: ${get_timestamp_ref.output.result} .",
+              "notification_type": "${workflow.input.notification_type}",
+              "notification_from": "${workflow.input.notification_from}",
+              "notification_to": "${workflow.input.notification_to}"
+            },
+            "type": "SUB_WORKFLOW",
+            "decisionCases": {},
+            "defaultCase": [],
+            "forkTasks": [],
+            "startDelay": 0,
+            "subWorkflowParam": {
+              "name": "Notify-Channels"
+            },
+            "joinOn": [],
+            "optional": false,
+            "defaultExclusiveJoinTask": [],
+            "asyncComplete": false,
+            "loopOver": []
+          }
+        ]
+      },
+      "defaultCase": [],
+      "forkTasks": [],
+      "startDelay": 0,
+      "joinOn": [],
+      "optional": false,
+      "defaultExclusiveJoinTask": [],
+      "asyncComplete": false,
+      "loopOver": [],
+      "evaluatorType": "javascript",
+      "expression": "$.switchCaseValue == 200 ? 'PASSED' : 'FAILED'"
+    }
+  ],
+  "inputParameters": [
+    "endpoint_url",
+    "notification_type",
+    "notification_to",
+    "notification_from"
+  ],
+  "outputParameters": {
+    "statusCode": "${call_endpoint.output.response.statusCode}"
+  },
+  "schemaVersion": 2,
+  "restartable": true,
+  "workflowStatusListenerEnabled": false,
+  "ownerEmail": "dilip@orkes.io",
+  "timeoutPolicy": "ALERT_ONLY",
+  "timeoutSeconds": 0,
+  "variables": {},
+  "inputTemplate": {}
+}
