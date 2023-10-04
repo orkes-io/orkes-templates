@@ -1,0 +1,46 @@
+[
+    {
+        "name": "video_recipes_prefork",
+        "retryCount": 3,
+        "timeoutSeconds": 30,
+        "pollTimeoutSeconds": 30,
+        "inputKeys": [
+          "fileLocations",
+          "recipeInfos"
+        ],
+        "outputKeys": [
+          "dynamicTasks",
+          "dynamicTasksInput"
+        ],
+        "timeoutPolicy": "TIME_OUT_WF",
+        "retryLogic": "FIXED",
+        "retryDelaySeconds": 15,
+        "responseTimeoutSeconds": 30,
+        "concurrentExecLimit": 100,
+        "rateLimitFrequencyInSeconds": 60,
+        "rateLimitPerFrequency": 50,
+        "ownerEmail": "engineering@orkes.io"
+      },
+      {
+        "name": "video_recipes",
+        "retryCount": 3,
+        "timeoutSeconds": 3600,
+        "pollTimeoutSeconds": 3600,
+        "inputKeys": [
+          "fileLocation",
+          "recipe",
+          "recipeParameters"
+        ],
+        "outputKeys": [
+          "fileLocation"
+        ],
+        "timeoutPolicy": "TIME_OUT_WF",
+        "retryLogic": "FIXED",
+        "retryDelaySeconds": 600,
+        "responseTimeoutSeconds": 3600,
+        "concurrentExecLimit": 100,
+        "rateLimitFrequencyInSeconds": 60,
+        "rateLimitPerFrequency": 50,
+        "ownerEmail": "engineering@orkes.io"
+      }            
+]
