@@ -1,5 +1,4 @@
-{
-  "updateTime": 1653890368340,
+[{
   "name": "video_recipes",
   "description": "Video Recipes Workflow",
   "version": 1,
@@ -73,4 +72,4 @@
   "timeoutSeconds": 0,
   "variables": {},
   "inputTemplate": {}
-}
+}]
