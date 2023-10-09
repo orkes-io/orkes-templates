@@ -1,0 +1,211 @@
+{
+  "createTime": 1689697156999,
+  "updateTime": 1652207289666,
+  "name": "VisualImageSearch",
+  "description": "Visual Image search using Computer Visions and Search APIs",
+  "version": 13,
+  "tasks": [
+    {
+      "name": "image_analyze",
+      "taskReferenceName": "image_analyze_ref",
+      "inputParameters": {
+        "http_request": {
+          "uri": "https://orkestestcv.cognitiveservices.azure.com/vision/v3.2/analyze?visualFeatures=Categories,Description&details=Celebrities,Landmarks",
+          "method": "POST",
+          "headers": {
+            "Ocp-Apim-Subscription-Key": "843fab2927c54bd9956ac18ed7b7788a"
+          },
+          "readTimeOut": 12000,
+          "body": {
+            "url": "${workflow.input.imageUrl}"
+          }
+        }
+      },
+      "type": "HTTP",
+      "decisionCases": {},
+      "defaultCase": [],
+      "forkTasks": [],
+      "startDelay": 0,
+      "joinOn": [],
+      "optional": false,
+      "defaultExclusiveJoinTask": [],
+      "asyncComplete": false,
+      "loopOver": [],
+      "cacheKey": {},
+      "cacheTTL": 0,
+      "onStateChange": {}
+    },
+    {
+      "name": "process_payload",
+      "taskReferenceName": "process_payload_ref",
+      "inputParameters": {
+        "body": "${image_analyze_ref.output.response.body}",
+        "queryExpression": "{ tags : .body.description.tags}, { captions: [.body.description.captions[] | .text]}"
+      },
+      "type": "JSON_JQ_TRANSFORM",
+      "decisionCases": {},
+      "defaultCase": [],
+      "forkTasks": [],
+      "startDelay": 0,
+      "joinOn": [],
+      "optional": false,
+      "defaultExclusiveJoinTask": [],
+      "asyncComplete": false,
+      "loopOver": [],
+      "cacheKey": {},
+      "cacheTTL": 0,
+      "onStateChange": {}
+    },
+    {
+      "name": "fork_join",
+      "taskReferenceName": "forkx",
+      "inputParameters": {},
+      "type": "FORK_JOIN",
+      "decisionCases": {},
+      "defaultCase": [],
+      "forkTasks": [
+        [
+          {
+            "name": "extract_caption",
+            "taskReferenceName": "extract_caption_ref1",
+            "inputParameters": {
+              "body": "${image_analyze_ref.output.response.body}",
+              "queryExpression": " [.body.description.captions[] | .text][0]"
+            },
+            "type": "JSON_JQ_TRANSFORM",
+            "decisionCases": {},
+            "defaultCase": [],
+            "forkTasks": [],
+            "startDelay": 0,
+            "joinOn": [],
+            "optional": false,
+            "defaultExclusiveJoinTask": [],
+            "asyncComplete": false,
+            "loopOver": [],
+            "cacheKey": {},
+            "cacheTTL": 0,
+            "onStateChange": {}
+          }
+        ],
+        [
+          {
+            "name": "extract_caption",
+            "taskReferenceName": "extract_caption_ref2",
+            "inputParameters": {
+              "body": "${image_analyze_ref.output.response.body}",
+              "queryExpression": " [.body.description.captions[] | .text][0]"
+            },
+            "type": "JSON_JQ_TRANSFORM",
+            "decisionCases": {},
+            "defaultCase": [],
+            "forkTasks": [],
+            "startDelay": 0,
+            "joinOn": [],
+            "optional": false,
+            "defaultExclusiveJoinTask": [],
+            "asyncComplete": false,
+            "loopOver": [],
+            "cacheKey": {},
+            "cacheTTL": 0,
+            "onStateChange": {}
+          }
+        ]
+      ],
+      "startDelay": 0,
+      "joinOn": [],
+      "optional": false,
+      "defaultExclusiveJoinTask": [],
+      "asyncComplete": false,
+      "loopOver": [],
+      "cacheKey": {},
+      "cacheTTL": 0,
+      "onStateChange": {}
+    },
+    {
+      "name": "join",
+      "taskReferenceName": "join2",
+      "inputParameters": {},
+      "type": "JOIN",
+      "decisionCases": {},
+      "defaultCase": [],
+      "forkTasks": [],
+      "startDelay": 0,
+      "joinOn": [
+        "extract_caption_ref1",
+        "extract_caption_ref2"
+      ],
+      "optional": false,
+      "defaultExclusiveJoinTask": [],
+      "asyncComplete": false,
+      "loopOver": [],
+      "cacheKey": {},
+      "cacheTTL": 0,
+      "onStateChange": {}
+    },
+    {
+      "name": "image_search",
+      "taskReferenceName": "image_search_ref",
+      "inputParameters": {
+        "http_request": {
+          "uri": "https://api.bing.microsoft.com/v7.0/images/search?q=${extract_caption_ref1.output.result}",
+          "method": "GET",
+          "headers": {
+            "Ocp-Apim-Subscription-Key": "4f6b4dd366e842b9b846408c15cfcf37"
+          },
+          "readTimeOut": 12000
+        }
+      },
+      "type": "HTTP",
+      "decisionCases": {},
+      "defaultCase": [],
+      "forkTasks": [],
+      "startDelay": 0,
+      "joinOn": [],
+      "optional": false,
+      "defaultExclusiveJoinTask": [],
+      "asyncComplete": false,
+      "loopOver": [],
+      "cacheKey": {},
+      "cacheTTL": 0,
+      "onStateChange": {}
+    },
+    {
+      "name": "extract_image_urls",
+      "taskReferenceName": "extract_image_urls_ref",
+      "inputParameters": {
+        "body": "${image_search_ref.output.response.body}",
+        "queryExpression": "{imageUrls : [.body.value[].thumbnailUrl]}"
+      },
+      "type": "JSON_JQ_TRANSFORM",
+      "decisionCases": {},
+      "defaultCase": [],
+      "forkTasks": [],
+      "startDelay": 0,
+      "joinOn": [],
+      "optional": false,
+      "defaultExclusiveJoinTask": [],
+      "asyncComplete": false,
+      "loopOver": [],
+      "cacheKey": {},
+      "cacheTTL": 0,
+      "onStateChange": {}
+    }
+  ],
+  "inputParameters": [
+    "imageUrl"
+  ],
+  "outputParameters": {
+    "similarImages": "${extract_image_urls_ref.output.result}",
+    "categories": "${image_analyze_ref.output.response.body.categories}",
+    "description": "${image_analyze_ref.output.response.body.description}"
+  },
+  "schemaVersion": 2,
+  "restartable": true,
+  "workflowStatusListenerEnabled": false,
+  "ownerEmail": "jeu@orkes.io",
+  "timeoutPolicy": "ALERT_ONLY",
+  "timeoutSeconds": 0,
+  "variables": {},
+  "inputTemplate": {},
+  "onStateChange": {}
+}
