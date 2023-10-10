@@ -1,0 +1,149 @@
+[
+  {
+    "createTime": 1696978359248,
+    "updateTime": 1680676920963,
+    "name": "automatic_subtitle_generator",
+    "description": "Automatically Generates Subtitles using the power of Generative AI and ffmpeg.",
+    "version": 1,
+    "tasks": [
+      {
+        "name": "split_video",
+        "taskReferenceName": "split_video_ref",
+        "inputParameters": {
+          "fileLocation": "${workflow.input.fileLocation}",
+          "outputFileNamePrefix": "${workflow.input.outputFileNamePrefix}",
+          "durationInSeconds": "${workflow.input.durationInSeconds}"
+        },
+        "type": "SIMPLE",
+        "decisionCases": {},
+        "defaultCase": [],
+        "forkTasks": [],
+        "startDelay": 0,
+        "joinOn": [],
+        "optional": false,
+        "defaultExclusiveJoinTask": [],
+        "asyncComplete": false,
+        "loopOver": [],
+        "cacheKey": {},
+        "cacheTTL": 0,
+        "onStateChange": {}
+      },
+      {
+        "name": "split_files_transform",
+        "taskReferenceName": "split_files_transform_ref",
+        "inputParameters": {
+          "queryExpression": ".body | to_entries | map({\"dataIndex\": .key, \"fileLocation\":.value, \"open_api_key\": \"${workflow.secrets.openai_api_key}\"})\n",
+          "body": "${split_video_ref.output.splitFiles}"
+        },
+        "type": "JSON_JQ_TRANSFORM",
+        "decisionCases": {},
+        "defaultCase": [],
+        "forkTasks": [],
+        "startDelay": 0,
+        "joinOn": [],
+        "optional": false,
+        "defaultExclusiveJoinTask": [],
+        "asyncComplete": false,
+        "loopOver": [],
+        "cacheKey": {},
+        "cacheTTL": 0,
+        "onStateChange": {}
+      },
+      {
+        "name": "transcribe_dynamic_fork",
+        "taskReferenceName": "transcribe_dynamic_fork_ref",
+        "inputParameters": {
+          "forkTaskName": "transcribe",
+          "forkTaskInputs": "${split_files_transform_ref.output.result}"
+        },
+        "type": "FORK_JOIN_DYNAMIC",
+        "decisionCases": {},
+        "dynamicForkTasksParam": "dynamicTasks",
+        "dynamicForkTasksInputParamName": "dynamicTasksInput",
+        "defaultCase": [],
+        "forkTasks": [],
+        "startDelay": 0,
+        "joinOn": [],
+        "optional": false,
+        "defaultExclusiveJoinTask": [],
+        "asyncComplete": false,
+        "loopOver": [],
+        "cacheKey": {},
+        "cacheTTL": 0,
+        "onStateChange": {}
+      },
+      {
+        "name": "transcribe_join",
+        "taskReferenceName": "transcribe_join_ref",
+        "inputParameters": {},
+        "type": "JOIN",
+        "decisionCases": {},
+        "defaultCase": [],
+        "forkTasks": [],
+        "startDelay": 0,
+        "joinOn": [],
+        "optional": false,
+        "defaultExclusiveJoinTask": [],
+        "asyncComplete": false,
+        "loopOver": [],
+        "cacheKey": {},
+        "cacheTTL": 0,
+        "onStateChange": {}
+      },
+      {
+        "name": "transcribe_join_transform",
+        "taskReferenceName": "transcribe_join_transform_ref",
+        "inputParameters": {
+          "queryExpression": ".body | to_entries | map({\"dataIndex\": .value.dataIndex, \"fileLocation\":.value.fileLocation, \"subtitleFileUrl\":.value.subtitleFileUrl, \"videoFileWithSubtitlesUrl\" : .value.videoFileWithSubtitlesUrl}) | sort_by(.dataIndex)\n",
+          "body": "${transcribe_join_ref.output}"
+        },
+        "type": "JSON_JQ_TRANSFORM",
+        "decisionCases": {},
+        "defaultCase": [],
+        "forkTasks": [],
+        "startDelay": 0,
+        "joinOn": [],
+        "optional": false,
+        "defaultExclusiveJoinTask": [],
+        "asyncComplete": false,
+        "loopOver": [],
+        "cacheKey": {},
+        "cacheTTL": 0,
+        "onStateChange": {}
+      },
+      {
+        "name": "merge_video_subtitles",
+        "taskReferenceName": "merge_video_subtitles_ref",
+        "inputParameters": {
+          "files_to_merge": "${transcribe_join_transform_ref.output.result}",
+          "outputFileFormat": "${workflow.input.outputFileFormat}",
+          "fileLocation": "${workflow.input.fileLocation}"
+        },
+        "type": "SIMPLE",
+        "decisionCases": {},
+        "defaultCase": [],
+        "forkTasks": [],
+        "startDelay": 0,
+        "joinOn": [],
+        "optional": false,
+        "defaultExclusiveJoinTask": [],
+        "asyncComplete": false,
+        "loopOver": [],
+        "cacheKey": {},
+        "cacheTTL": 0,
+        "onStateChange": {}
+      }
+    ],
+    "inputParameters": [],
+    "outputParameters": {},
+    "schemaVersion": 2,
+    "restartable": true,
+    "workflowStatusListenerEnabled": false,
+    "ownerEmail": "jeu@orkes.io",
+    "timeoutPolicy": "ALERT_ONLY",
+    "timeoutSeconds": 0,
+    "variables": {},
+    "inputTemplate": {},
+    "onStateChange": {}
+  }
+]

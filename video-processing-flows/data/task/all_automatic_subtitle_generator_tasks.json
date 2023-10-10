@@ -1,0 +1,72 @@
+[
+  {
+    "name": "split_video",
+    "retryCount": 3,"timeoutSeconds": 30,
+    "pollTimeoutSeconds": 30,
+    "inputKeys": [
+      "fileLocation",
+      "outputFileNamePrefix",
+      "durationInSeconds"
+    ],
+    "outputKeys": [
+      "fileLocation",
+      "splitFiles"
+    ],
+    "timeoutPolicy": "TIME_OUT_WF",
+    "retryLogic": "FIXED",
+    "retryDelaySeconds": 30,
+    "responseTimeoutSeconds": 30,
+    "concurrentExecLimit": 100,
+    "rateLimitFrequencyInSeconds": 30,
+    "rateLimitPerFrequency": 50,
+    "ownerEmail": "devrel@orkes.io"
+  },
+  {
+    "name": "transcribe",
+    "retryCount": 3,
+    "timeoutSeconds": 30,
+    "pollTimeoutSeconds": 30,
+    "inputKeys": [
+      "fileLocation",
+      "open_api_key",
+      "dataIndex"
+    ],
+    "outputKeys": [
+      "subtitleFileUrl",
+      "videoFileWithSubtitlesUrl",
+      "dataIndex",
+      "fileLocation"
+    ],
+    "timeoutPolicy": "TIME_OUT_WF",
+    "retryLogic": "FIXED",
+    "retryDelaySeconds": 30,
+    "responseTimeoutSeconds": 30,
+    "concurrentExecLimit": 100,
+    "rateLimitFrequencyInSeconds": 30,
+    "rateLimitPerFrequency": 50,
+    "ownerEmail": "devrel@orkes.io"
+  },
+  {
+    "name": "merge_video_subtitles",
+    "retryCount": 3,
+    "timeoutSeconds": 30,
+    "pollTimeoutSeconds": 30,
+    "inputKeys": [
+      "files_to_merge",
+      "outputFileFormat",
+      "fileLocation"
+    ],
+    "outputKeys": [
+      "subTitleFileLocation",
+      "fileLocation"
+    ],
+    "timeoutPolicy": "TIME_OUT_WF",
+    "retryLogic": "FIXED",
+    "retryDelaySeconds": 30,
+    "responseTimeoutSeconds": 30,
+    "concurrentExecLimit": 100,
+    "rateLimitFrequencyInSeconds": 30,
+    "rateLimitPerFrequency": 50,
+    "ownerEmail": "devrel@orkes.io"
+  }
+]
