@@ -1,0 +1,78 @@
+plugins {
+    id 'org.springframework.boot' version '2.5.5'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
+}
+
+ext {
+    appVersion = '1.0-SNAPSHOT'
+    versions = [
+            orkesClient: '1.0.2',
+            guava      : '31.0.1-jre',
+            im4java    : '1.4.0',
+            log4j      : '2.17.1!!',
+            protobuf   : '3.19.4',
+            awsSdkBom  : '1.12+'
+    ]
+}
+
+group 'io.orkes.samples'
+version "${appVersion}"
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://orkes-artifacts-repo.s3.amazonaws.com/snapshots/'
+        content {
+            includeGroup 'io.orkes.conductor'
+        }
+    }
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter'
+
+    implementation "org.apache.logging.log4j:log4j-api:${versions.log4j}"
+    implementation "org.apache.logging.log4j:log4j-core:${versions.log4j}"
+    implementation "org.apache.logging.log4j:log4j-jul:${versions.log4j}"
+    implementation "org.apache.logging.log4j:log4j-to-slf4j:${versions.log4j}"
+    implementation "org.apache.logging.log4j:log4j-web:${versions.log4j}"
+
+    implementation "io.orkes.conductor:orkes-conductor-client:${versions.orkesClient}"
+    implementation 'com.netflix.conductor:conductor-common:3.8.1'
+    implementation 'com.netflix.conductor:conductor-client:3.8.1'
+
+    implementation "org.im4java:im4java:${versions.im4java}"
+    implementation "com.google.guava:guava:${versions.guava}"
+    implementation "com.google.protobuf:protobuf-java:${versions.protobuf}"
+    implementation 'org.apache.commons:commons-lang3'
+    implementation platform("com.amazonaws:aws-java-sdk-bom:${versions.awsSdkBom}")
+
+    implementation group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.5.14'
+    implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.14'
+    implementation group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.16'
+    implementation group: 'commons-io', name: 'commons-io', version: '2.7'
+
+    implementation 'com.amazonaws:aws-java-sdk-s3'
+    implementation 'com.amazonaws:aws-java-sdk-sts'
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // test dependencies
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+configurations {
+    all {
+        exclude group: 'com.github.vmg.protogen', module: 'protogen-annotations'
+        exclude group: 'org.apache.logging.log4j', module: 'log4j-slf4j-impl'
+    }
+}
+
