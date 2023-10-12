@@ -1,15 +1,50 @@
-# Sample workflows using Netflix Conductor
+# Video Processing flows with Orkes
+This project contains a list of workers for the following video processing use cases
 
-## These demos are a work in progress, and under continuous improvement.
+1. Video Transcoding
+2. Video Watermarking
+3. Automatic Subtitle Generation
+4. Thumbnail / Artwork Generation from Videos
 
-## Running your first worker
+## Pre-Requistes
+### Installing FFMPEG
 
-The [Running your first worker](https://orkes.io/content/docs/getting-started/run/running-first-worker) tutorial will walk you through running your first worker.  This will use the SimpleWorker.java and OrkesWorkerApplication.java
+#### MacOS
+```shell
+brew install ffmpeg
+```
 
-## Creating an image processing workflow
-### Run locally
-Once you have set up [Conductor locally](https://orkes.io/content/docs/getting-started/install/running-locally), there are several image processing workflows you can run.
 
-1. First image processing workflow. The [tutorial](https://orkes.io/content/blog/image-processing-workflow-with-conductor) will walk you through setting up tasks and a workflow.  Once it is up and running, you can send an image and dimensions - and receive a link to the modified image on S3.
-2. Image processing with FORKs.  Using a [Conductor Fork](https://orkes.io/content/blog/image-processing-multiple-images-forks) allows us to run  processes in parallel - in this case creating a jpg and webp image.
-3. Image processing with FORKs and Sub_workflows.  This example substitues the 2 tasks for the JPEG creation in example 2 with a subworkflow.
+#### Other Operating Systems
+```shell
+https://www.hostinger.com/tutorials/how-to-install-ffmpeg
+```
+
+## Generating Access Keys
+```shell
+https://orkes.io/content/access-control-and-security/applications#generating-access-keys
+```
+
+## Download this project
+```shell
+https://github.com/orkes-io/orkes-templates/tree/main/video-processing-flows
+```
+This is a springboot application. You can build and run projecct using gradle
+```shell
+gradle clean build
+gradle bootRun
+```
+
+All the Associated task workers are bundled with this project in the src/main/java/io/orkes/samples/workers folder
+When the Spring Boot Application comes up you can see the workers pool the conductor cluster for work in the console
+
+The Conductor cluster details and the access keys are specified in the
+src/main/resources/application.properties file
+
+## Download this project
+Go to the Conductor UI and run the workflow with the specified inputs as specified in the following documentation pages
+
+TODO: add doc links here
+
+
+
