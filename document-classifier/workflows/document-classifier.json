@@ -1,0 +1,248 @@
+{
+    "name": "document_classifier",
+    "description": "Document Classification Workflow",
+    "version": 1,
+    "tasks": [
+      {
+        "name": "switch_task_1",
+        "taskReferenceName": "switch_task_ref_1",
+        "inputParameters": {
+          "url": "${workflow.input.document_url}"
+        },
+        "type": "SWITCH",
+        "decisionCases": {
+          "PDF": [
+            {
+              "name": "get_document_task",
+              "taskReferenceName": "get_document_task_ref",
+              "inputParameters": {
+                "url": "${workflow.input.document_url}"
+              },
+              "type": "GET_DOCUMENT",
+              "decisionCases": {},
+              "defaultCase": [],
+              "forkTasks": [],
+              "startDelay": 0,
+              "joinOn": [],
+              "optional": false,
+              "defaultExclusiveJoinTask": [],
+              "asyncComplete": false,
+              "loopOver": [],
+              "onStateChange": {}
+            },
+            {
+              "name": "set_variable_task_1",
+              "taskReferenceName": "set_variable_task_ref_1",
+              "inputParameters": {
+                "text": "${get_document_task_ref.output.result}"
+              },
+              "type": "SET_VARIABLE",
+              "decisionCases": {},
+              "defaultCase": [],
+              "forkTasks": [],
+              "startDelay": 0,
+              "joinOn": [],
+              "optional": false,
+              "defaultExclusiveJoinTask": [],
+              "asyncComplete": false,
+              "loopOver": [],
+              "onStateChange": {}
+            }
+          ],
+          "IMAGE": [
+            {
+              "name": "ocr_task",
+              "taskReferenceName": "ocr_task_ref1",
+              "inputParameters": {
+                "image_url": "${workflow.input.document_url}"
+              },
+              "type": "SIMPLE",
+              "decisionCases": {},
+              "defaultCase": [],
+              "forkTasks": [],
+              "startDelay": 0,
+              "joinOn": [],
+              "optional": false,
+              "defaultExclusiveJoinTask": [],
+              "asyncComplete": false,
+              "loopOver": [],
+              "onStateChange": {}
+            },
+            {
+              "name": "set_variable_task",
+              "taskReferenceName": "set_variable_task_ref",
+              "inputParameters": {
+                "text": "${ocr_task_ref1.output.result}"
+              },
+              "type": "SET_VARIABLE",
+              "decisionCases": {},
+              "defaultCase": [],
+              "forkTasks": [],
+              "startDelay": 0,
+              "joinOn": [],
+              "optional": false,
+              "defaultExclusiveJoinTask": [],
+              "asyncComplete": false,
+              "loopOver": [],
+              "onStateChange": {}
+            }
+          ]
+        },
+        "defaultCase": [],
+        "forkTasks": [],
+        "startDelay": 0,
+        "joinOn": [],
+        "optional": false,
+        "defaultExclusiveJoinTask": [],
+        "asyncComplete": false,
+        "loopOver": [],
+        "evaluatorType": "graaljs",
+        "expression": "$.url.toLowerCase().endsWith(\"pdf\") ? \"PDF\" : \"IMAGE\"",
+        "onStateChange": {}
+      },
+      {
+        "name": "classify_using_llm",
+        "taskReferenceName": "classify_using_llm",
+        "inputParameters": {
+          "promptName": "classification",
+          "promptVariables": {
+            "text": "${workflow.variables.text}"
+          },
+          "llmProvider": "azure_openai",
+          "model": "text-davinci-003"
+        },
+        "type": "LLM_TEXT_COMPLETE",
+        "decisionCases": {},
+        "defaultCase": [],
+        "forkTasks": [],
+        "startDelay": 0,
+        "joinOn": [],
+        "optional": false,
+        "defaultExclusiveJoinTask": [],
+        "asyncComplete": false,
+        "loopOver": [],
+        "onStateChange": {}
+      },
+      {
+        "name": "switch_task",
+        "taskReferenceName": "switch_task_ref",
+        "inputParameters": {
+          "classificationStatus": "${classify_using_llm.output.result}"
+        },
+        "type": "SWITCH",
+        "decisionCases": {
+          " NO_MATCH": [
+            {
+              "name": "classify_asset_human_task",
+              "taskReferenceName": "classify_asset_human_task",
+              "inputParameters": {
+                "_humanTaskAssignmentPolicy": {
+                  "type": "free_for_all"
+                },
+                "_humanTaskTimeoutPolicy": {
+                  "type": "never"
+                },
+                "_humanTaskOwners": [
+                  "USER:abhishek.gupta@orkes.io",
+                  "USER:boney@orkes.io",
+                  "USER:dilip@orkes.io",
+                  "USER:jeu@orkes.io",
+                  "USER:tomas@orkes.io",
+                  "USER:viren@orkes.io",
+                  "USER:leah.simons@orkes.io",
+                  "USER:james.stuart@orkes.io"
+                ],
+                "_humanTaskTemplate": "bc098687-4621-11ee-b23b-d6ad14da6360",
+                "_humanTaskPredefinedInput": {
+                  "link": "${workflow.input.document_url}"
+                }
+              },
+              "type": "HUMAN",
+              "decisionCases": {},
+              "defaultCase": [],
+              "forkTasks": [],
+              "startDelay": 0,
+              "joinOn": [],
+              "optional": false,
+              "defaultExclusiveJoinTask": [],
+              "asyncComplete": false,
+              "loopOver": [],
+              "onStateChange": {}
+            }
+          ]
+        },
+        "defaultCase": [],
+        "forkTasks": [],
+        "startDelay": 0,
+        "joinOn": [],
+        "optional": false,
+        "defaultExclusiveJoinTask": [],
+        "asyncComplete": false,
+        "loopOver": [],
+        "evaluatorType": "value-param",
+        "expression": "classificationStatus",
+        "onStateChange": {}
+      },
+      {
+        "name": "extract_classification",
+        "taskReferenceName": "extract_classification",
+        "inputParameters": {
+          "expression": "(function(){ \n  let llmResult = new String($.llmResult).trim();\n  if(llmResult === 'NO_MATCH') {\n    return $.manualResult;\n  }\n  return llmResult;\n})();",
+          "evaluatorType": "graaljs",
+          "llmResult": "${classify_using_llm.output.result}",
+          "manualResult": "${classify_asset_human_task.output.classification}"
+        },
+        "type": "INLINE",
+        "decisionCases": {},
+        "defaultCase": [],
+        "forkTasks": [],
+        "startDelay": 0,
+        "joinOn": [],
+        "optional": false,
+        "defaultExclusiveJoinTask": [],
+        "asyncComplete": false,
+        "loopOver": [],
+        "onStateChange": {}
+      },
+      {
+        "name": "continue_with_rest_of_workflow",
+        "taskReferenceName": "continue_with_rest_of_workflow",
+        "inputParameters": {
+          "uri": "https://orkes-api-tester.orkesconductor.com/api",
+          "method": "GET",
+          "connectionTimeOut": 3000,
+          "readTimeOut": "3000",
+          "accept": "application/json",
+          "contentType": "application/json",
+          "body": {
+            "message": "This here is a test task to show we can continue the wf"
+          }
+        },
+        "type": "HTTP",
+        "decisionCases": {},
+        "defaultCase": [],
+        "forkTasks": [],
+        "startDelay": 0,
+        "joinOn": [],
+        "optional": false,
+        "defaultExclusiveJoinTask": [],
+        "asyncComplete": false,
+        "loopOver": [],
+        "onStateChange": {}
+      }
+    ],
+    "inputParameters": [
+      "document_url"
+    ],
+    "outputParameters": {},
+    "failureWorkflow": "",
+    "schemaVersion": 2,
+    "restartable": true,
+    "workflowStatusListenerEnabled": false,
+    "ownerEmail": "viren@orkes.io",
+    "timeoutPolicy": "ALERT_ONLY",
+    "timeoutSeconds": 0,
+    "variables": {},
+    "inputTemplate": {},
+    "onStateChange": {}
+  }
