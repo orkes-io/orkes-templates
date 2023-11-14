@@ -1,27 +1,73 @@
-{
-  "createTime": 1699732862120,
-  "updateTime": 1699824674559,
-  "name": "document_classifier",
-  "description": "LLM Powered PDF Document Classification Workflow",
-  "version": 1,
-  "tasks": [
-    {
-      "name": "check_for_pdf",
-      "taskReferenceName": "check_for_pdf_ref",
-      "inputParameters": {
-        "url": "${workflow.input.document_url}"
-      },
-      "type": "SWITCH",
-      "decisionCases": {
-        "PDF": [
+[
+  {
+    "createTime": 1699732862120,
+    "updateTime": 1699824674559,
+    "name": "document_classifier",
+    "description": "LLM Powered PDF Document Classification Workflow",
+    "version": 1,
+    "tasks": [
+      {
+        "name": "check_for_pdf",
+        "taskReferenceName": "check_for_pdf_ref",
+        "inputParameters": {
+          "url": "${workflow.input.document_url}"
+        },
+        "type": "SWITCH",
+        "decisionCases": {
+          "PDF": [
+            {
+              "name": "get_document_task",
+              "taskReferenceName": "get_document_task_ref",
+              "inputParameters": {
+                "url": "${workflow.input.document_url}",
+                "mediaType": "application/pdf"
+              },
+              "type": "GET_DOCUMENT",
+              "decisionCases": {},
+              "defaultCase": [],
+              "forkTasks": [],
+              "startDelay": 0,
+              "joinOn": [],
+              "optional": false,
+              "defaultExclusiveJoinTask": [],
+              "asyncComplete": false,
+              "loopOver": [],
+              "onStateChange": {}
+            }
+          ]
+        },
+        "defaultCase": [
           {
-            "name": "get_document_task",
-            "taskReferenceName": "get_document_task_ref",
+            "name": "generate_error",
+            "taskReferenceName": "generate_error_ref",
             "inputParameters": {
-              "url": "${workflow.input.document_url}",
-              "mediaType": "application/pdf"
+              "expression": "(function(){ \n\n  return \"The filename supplied: \" + $.filename + \" is an unsupported file type. Please try again with a .pdf file\";\n})();",
+              "evaluatorType": "graaljs",
+              "filename": "${workflow.input.document_url}"
             },
-            "type": "GET_DOCUMENT",
+            "type": "INLINE",
+            "decisionCases": {},
+            "defaultCase": [],
+            "forkTasks": [],
+            "startDelay": 0,
+            "joinOn": [],
+            "optional": false,
+            "defaultExclusiveJoinTask": [],
+            "asyncComplete": false,
+            "loopOver": [],
+            "onStateChange": {}
+          },
+          {
+            "name": "terminate_task",
+            "taskReferenceName": "terminate_task_ref",
+            "inputParameters": {
+              "terminationStatus": "TERMINATED",
+              "terminationReason": "Unsupported file type",
+              "workflowOutput": {
+                "result": "${generate_error_ref.output}"
+              }
+            },
+            "type": "TERMINATE",
             "decisionCases": {},
             "defaultCase": [],
             "forkTasks": [],
@@ -33,119 +79,73 @@
             "loopOver": [],
             "onStateChange": {}
           }
-        ]
-      },
-      "defaultCase": [
-        {
-          "name": "generate_error",
-          "taskReferenceName": "generate_error_ref",
-          "inputParameters": {
-            "expression": "(function(){ \n\n  return \"The filename supplied: \" + $.filename + \" is an unsupported file type. Please try again with a .pdf file\";\n})();",
-            "evaluatorType": "graaljs",
-            "filename": "${workflow.input.document_url}"
-          },
-          "type": "INLINE",
-          "decisionCases": {},
-          "defaultCase": [],
-          "forkTasks": [],
-          "startDelay": 0,
-          "joinOn": [],
-          "optional": false,
-          "defaultExclusiveJoinTask": [],
-          "asyncComplete": false,
-          "loopOver": [],
-          "onStateChange": {}
-        },
-        {
-          "name": "terminate_task",
-          "taskReferenceName": "terminate_task_ref",
-          "inputParameters": {
-            "terminationStatus": "TERMINATED",
-            "terminationReason": "Unsupported file type",
-            "workflowOutput": {
-              "result": "${generate_error_ref.output}"
-            }
-          },
-          "type": "TERMINATE",
-          "decisionCases": {},
-          "defaultCase": [],
-          "forkTasks": [],
-          "startDelay": 0,
-          "joinOn": [],
-          "optional": false,
-          "defaultExclusiveJoinTask": [],
-          "asyncComplete": false,
-          "loopOver": [],
-          "onStateChange": {}
-        }
-      ],
-      "forkTasks": [],
-      "startDelay": 0,
-      "joinOn": [],
-      "optional": false,
-      "defaultExclusiveJoinTask": [],
-      "asyncComplete": false,
-      "loopOver": [],
-      "evaluatorType": "graaljs",
-      "expression": "$.url.toLowerCase().trim().endsWith(\"pdf\") ? \"PDF\" : \"NOT_SUPPORTED\";",
-      "onStateChange": {}
-    },
-    {
-      "name": "classify_using_llm",
-      "taskReferenceName": "classify_using_llm",
-      "inputParameters": {
-        "promptName": "doc_classifier_prompt",
-        "promptVariables": {
-          "text": "${get_document_task_ref.output.result}"
-        },
-        "llmProvider": "dl-test-3",
-        "model": "gpt-3.5-turbo"
-      },
-      "type": "LLM_TEXT_COMPLETE",
-      "decisionCases": {},
-      "defaultCase": [],
-      "forkTasks": [],
-      "startDelay": 0,
-      "joinOn": [],
-      "optional": false,
-      "defaultExclusiveJoinTask": [],
-      "asyncComplete": false,
-      "loopOver": [],
-      "onStateChange": {}
-    },
-    {
-      "name": "extract_classification",
-      "taskReferenceName": "extract_classification",
-      "inputParameters": {
-        "expression": "(function(){ \n  let llmResult = new String($.llmResult).trim();\n  if(llmResult === 'NO_MATCH') {\n    return \"This document couldn't be classified by the LLM\";\n  }\n  return \"LLM classified this document as: \" + llmResult;\n})();",
+        ],
+        "forkTasks": [],
+        "startDelay": 0,
+        "joinOn": [],
+        "optional": false,
+        "defaultExclusiveJoinTask": [],
+        "asyncComplete": false,
+        "loopOver": [],
         "evaluatorType": "graaljs",
-        "llmResult": "${classify_using_llm.output.result}"
+        "expression": "$.url.toLowerCase().trim().endsWith(\"pdf\") ? \"PDF\" : \"NOT_SUPPORTED\";",
+        "onStateChange": {}
       },
-      "type": "INLINE",
-      "decisionCases": {},
-      "defaultCase": [],
-      "forkTasks": [],
-      "startDelay": 0,
-      "joinOn": [],
-      "optional": false,
-      "defaultExclusiveJoinTask": [],
-      "asyncComplete": false,
-      "loopOver": [],
-      "onStateChange": {}
-    }
-  ],
-  "inputParameters": [
-    "document_url"
-  ],
-  "outputParameters": {},
-  "failureWorkflow": "",
-  "schemaVersion": 2,
-  "restartable": true,
-  "workflowStatusListenerEnabled": false,
-  "ownerEmail": "templates-dev@orkes.io",
-  "timeoutPolicy": "ALERT_ONLY",
-  "timeoutSeconds": 0,
-  "variables": {},
-  "inputTemplate": {},
-  "onStateChange": {}
-}
+      {
+        "name": "classify_using_llm",
+        "taskReferenceName": "classify_using_llm",
+        "inputParameters": {
+          "promptName": "doc_classifier_prompt",
+          "promptVariables": {
+            "text": "${get_document_task_ref.output.result}"
+          },
+          "llmProvider": "dl-test-3",
+          "model": "gpt-3.5-turbo"
+        },
+        "type": "LLM_TEXT_COMPLETE",
+        "decisionCases": {},
+        "defaultCase": [],
+        "forkTasks": [],
+        "startDelay": 0,
+        "joinOn": [],
+        "optional": false,
+        "defaultExclusiveJoinTask": [],
+        "asyncComplete": false,
+        "loopOver": [],
+        "onStateChange": {}
+      },
+      {
+        "name": "extract_classification",
+        "taskReferenceName": "extract_classification",
+        "inputParameters": {
+          "expression": "(function(){ \n  let llmResult = new String($.llmResult).trim();\n  if(llmResult === 'NO_MATCH') {\n    return \"This document couldn't be classified by the LLM\";\n  }\n  return \"LLM classified this document as: \" + llmResult;\n})();",
+          "evaluatorType": "graaljs",
+          "llmResult": "${classify_using_llm.output.result}"
+        },
+        "type": "INLINE",
+        "decisionCases": {},
+        "defaultCase": [],
+        "forkTasks": [],
+        "startDelay": 0,
+        "joinOn": [],
+        "optional": false,
+        "defaultExclusiveJoinTask": [],
+        "asyncComplete": false,
+        "loopOver": [],
+        "onStateChange": {}
+      }
+    ],
+    "inputParameters": ["document_url"],
+    "outputParameters": {},
+    "failureWorkflow": "",
+    "schemaVersion": 2,
+    "restartable": true,
+    "workflowStatusListenerEnabled": false,
+    "ownerEmail": "templates-dev@orkes.io",
+    "timeoutPolicy": "ALERT_ONLY",
+    "timeoutSeconds": 0,
+    "variables": {},
+    "inputTemplate": {},
+    "onStateChange": {}
+  }
+]
