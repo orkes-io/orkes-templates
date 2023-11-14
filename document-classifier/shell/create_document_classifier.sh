@@ -2,7 +2,7 @@
 echo "Starting the creation of the Document Classifier Application..."
 # Global variables
 workflow_template_URL="https://raw.githubusercontent.com/orkes-io/orkes-templates/main/document-classifier/workflows/document-classifier.json"
-prompt_text_URL="https://image-processing-orkes.s3.amazonaws.com/classify-document.prompt"
+prompt_text_URL="https://raw.githubusercontent.com/orkes-io/orkes-templates/main/document-classifier/prompts/classify-document.prompt"
 current_time=$(date +%s%3)
 document_classifier_input="https://image-processing-orkes.s3.amazonaws.com/test-w2-form-full-text.pdf"
 openai_integ_model_name="gpt-3.5-turbo"
