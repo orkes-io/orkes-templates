@@ -1,14 +1,14 @@
 #!/bin/bash
-echo "Starting the creation of the Document Classifier Application..."
+echo ">>> Starting the creation of the Document Classifier Application..."
 # Global variables
 workflow_template_URL="https://raw.githubusercontent.com/orkes-io/orkes-templates/main/document-classifier/workflows/document-classifier.json"
-prompt_text_URL="https://image-processing-orkes.s3.amazonaws.com/classify-document.prompt"
+prompt_text_URL="https://raw.githubusercontent.com/orkes-io/orkes-templates/main/document-classifier/prompts/classify-document.prompt"
 current_time=$(date +%s%3)
 document_classifier_input="https://image-processing-orkes.s3.amazonaws.com/test-w2-form-full-text.pdf"
 openai_integ_model_name="gpt-3.5-turbo"
 CONDUCTOR_SERVER_API_URL=${CONDUCTOR_SERVER_API_URL:-"https://play.orkes.io/api"}
 
-echo "Confirming all the required environment variables are set..."
+echo ">>> Confirming all the required environment variables are set..."
 # Check for required environment variables
 if [[ -z "$CONDUCTOR_ACCESS_TOKEN" && (-z "$CONDUCTOR_KEY" || -z "$CONDUCTOR_SECRET") ]]; then
     echo "Error: CONDUCTOR_ACCESS_TOKEN or both CONDUCTOR_KEY and CONDUCTOR_SECRET must be set"
@@ -20,7 +20,7 @@ if [ -z "$OPEN_AI_KEY" ]; then
     exit 1
 fi
 
-echo "Checking connectivity to Orkes Conductor server..."
+echo ">>> Checking connectivity to Orkes Conductor server..."
 # Check connectivity
 response=$(curl -s -o /dev/null -w "%{http_code}" "$CONDUCTOR_SERVER_API_URL/version")
 if [ "$response" -ne 200 ]; then
@@ -28,7 +28,7 @@ if [ "$response" -ne 200 ]; then
     exit 1
 fi
 
-echo "Obtaining user information..."
+echo ">>> Obtaining user information..."
 # Set the token
 if [ ! -z "$CONDUCTOR_ACCESS_TOKEN" ]; then
     user_info=$(curl -s -X 'GET' \
@@ -62,10 +62,10 @@ else
     user_id=$(echo "$user_info" | jq -r '.id' | sed 's/ /_/g')
 fi
 
-echo "Hello $user_name / $user_id"
+echo ">>> Hello $user_name / $user_id <<<"
 
 # Create LLM provider (OpenAI) integration
-echo "Creating a LLM provider integration with OpenAI..."
+echo ">>> Creating a LLM provider integration with OpenAI..."
 openai_integ_name="openai_${user_name}_${current_time}"
 openai_integ_params='{
   "category": "AI_MODEL",
@@ -84,7 +84,7 @@ openai_integ_response=$(curl -s -X 'POST' \
     -d "$openai_integ_params")
 
 # Add LLM model to integrationn
-echo "Adding model to the integration..."
+echo ">>> Adding model to the integration..."
 openai_integ_model_params='{
   "configuration": {},
   "description": "'"${openai_integ_model_name}"' from OpenAI",
@@ -98,7 +98,7 @@ openai_integ_model_response=$(curl -s -X 'POST' \
     -d "$openai_integ_model_params")
 
 # Add an AI prompt
-echo "Creating the AI prompt to be used for this application..."
+echo ">>> Creating the AI prompt to be used for this application..."
 ai_prompt_name="document_classification_prompt_${user_name}_${current_time}"
 ai_prompt_description=$(echo "This is a prompt to classify documents and is created using the Orkes quick start script" | jq -sRr @uri)
 ai_prompt_model_association=$(echo "${openai_integ_name}:${openai_integ_model_name}" | jq -sRr @uri)
@@ -113,9 +113,12 @@ prompt_response=$(curl -s -X 'POST' \
 
 
 # Create workflow
-echo "Creating athe workflow for this application using the integration and prompt that were created..."
-workflow_definition=$(curl  -s "$workflow_template_URL")
-workflow_definition_name=$(echo "$workflow_definition" | jq -r '.name' | sed "s/ /_/g")"_$user_name_$current_time"
+echo ">>> Creating the workflow for this application using the integration and prompt that were created..."
+workflow_definition=$(curl -s "$workflow_template_URL" | jq -r '.[0]')
+extracted_name=$(echo "$workflow_definition" | jq -r '.name')
+processed_name=$(echo "$extracted_name" | sed "s/ /_/g")
+workflow_definition_name="${processed_name}_${user_name}_${current_time}"
+
 workflow_definition=$(echo "$workflow_definition" | \
    jq '.name = "'"$workflow_definition_name"'" |
     .tasks[] |= (if .name == "classify_using_llm" then 
@@ -138,21 +141,21 @@ CONDUCTOR_SERVER_URL=${CONDUCTOR_SERVER_API_URL%/api}
 
 # Display success message
 echo ""
-echo "You have successfully created the below artifacts in Orkes Conductor:
-1/ An LLM integration with OpenAI listed in: $CONDUCTOR_SERVER_URL/integrations/$openai_integ_name/integration
-2/ A prompt for the document classification LLM call: $CONDUCTOR_SERVER_URL/ai_prompts/$ai_prompt_name
-3/ A document classifier workflow that uses this integration and prompt: $CONDUCTOR_SERVER_URL/workflowDef/$workflow_definition_name
+echo ">>> You have successfully created the below artifacts in Orkes Conductor:
+   >>> 1/ An LLM integration with OpenAI listed in: $CONDUCTOR_SERVER_URL/integrations/$openai_integ_name/integration
+   >>> 2/ A prompt for the document classification LLM call: $CONDUCTOR_SERVER_URL/ai_prompts/$ai_prompt_name
+   >>> 3/ A document classifier workflow that uses this integration and prompt: $CONDUCTOR_SERVER_URL/workflowDef/$workflow_definition_name
 
-Follow the above URLs to visually see the artifacts
-Now let's run this document classifier application with an example input"
-
-echo "Press any key to continue..."
+>>> Follow the above URLs to visually see the artifacts
+>>> Now let's run this document classifier application with an example input"
+echo ""
+echo ">>> Press any key to continue..."
 read -n 1 -s -r -p ""
 echo ""  
 
 
 # Call the workflow
-echo "Calling the execution of the $workflow_definition_name workflow..."
+echo ">>> Calling the execution of the $workflow_definition_name workflow..."
 workflow_execution_id=$(curl  -s -X 'POST' \
     "$CONDUCTOR_SERVER_API_URL/workflow/$workflow_definition_name?priority=0" \
     -H 'accept: text/plain' \
@@ -166,8 +169,8 @@ workflow_execution_id=$(curl  -s -X 'POST' \
 
 
 # Display execution message
-echo "Here is the execution view of your application. Follow this link to visually see the status and the results: $CONDUCTOR_SERVER_URL/execution/$workflow_execution_id"
-echo "Checking the status of the execution..."
+echo ">>> Here is the execution view of your application. Follow this link to visually see the status and the results: $CONDUCTOR_SERVER_URL/execution/$workflow_execution_id"
+echo ">>> Checking the status of the execution..."
 #!/bin/bash
 
 # Initialize start time and timeout
@@ -189,11 +192,11 @@ while [ $(($(date +%s) - start_time)) -lt $timeout ]; do
     # Check if status is COMPLETED
     if [ "$status" = "COMPLETED" ]; then
         echo ""
-        echo "Execution has completed..."
+        echo ">>> Execution has completed..."
         llm_response=$(echo $response | jq -r '.output.result')
-        echo "The result is: $llm_response"
+        echo ">>> The result is: $llm_response"
         echo ""
-        echo "Go to http://orkes.io/ai to learn more about how you can build Gen-AI powered applications!"
+        echo ">>> Go to http://orkes.io/ai to learn more about how you can build Gen-AI powered applications!"
         break
     fi
 
@@ -204,5 +207,5 @@ done
 
 # Optional: Check if loop exited due to timeout
 if [ "$status" != "COMPLETED" ]; then
-    echo "Timeout reached. Execution may not have completed. Please navigate to $CONDUCTOR_SERVER_URL/execution/$workflow_execution_id to visually inspect the execution"
+    echo ">>> Timeout reached. Execution may not have completed. Please navigate to $CONDUCTOR_SERVER_URL/execution/$workflow_execution_id to visually inspect the execution"
 fi
