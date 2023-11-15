@@ -151,10 +151,10 @@ echo ">>> You have successfully created the below artifacts in Orkes Conductor:
 echo ""
 echo ">>> Press any key to continue..."
 read -n 1 -s -r -p ""
-echo ""  
 
 
 # Call the workflow
+echo ""
 echo ">>> Calling the execution of the $workflow_definition_name workflow..."
 workflow_execution_id=$(curl  -s -X 'POST' \
     "$CONDUCTOR_SERVER_API_URL/workflow/$workflow_definition_name?priority=0" \
