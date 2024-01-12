@@ -1,0 +1,262 @@
+[
+  {
+    "createTime": 1703196002469,
+    "updateTime": 1704216571357,
+    "name": "user_welcome_journey",
+    "description": "user_welcome_journey",
+    "version": 1,
+    "tasks": [
+      {
+        "name": "fork",
+        "taskReferenceName": "fork_ref",
+        "inputParameters": {},
+        "type": "FORK_JOIN",
+        "decisionCases": {},
+        "defaultCase": [],
+        "forkTasks": [
+          [],
+          [
+            {
+              "name": "wait_for_lesson",
+              "taskReferenceName": "wait_for_lesson_1",
+              "description": "Step 1 - First workflow application",
+              "inputParameters": {
+                "docLink": "https://orkes.io/content/getting-started/first-workflow-application"
+              },
+              "type": "WAIT",
+              "decisionCases": {},
+              "defaultCase": [],
+              "forkTasks": [],
+              "startDelay": 0,
+              "joinOn": [],
+              "optional": false,
+              "defaultExclusiveJoinTask": [],
+              "asyncComplete": false,
+              "loopOver": [],
+              "onStateChange": {}
+            }
+          ],
+          [
+            {
+              "name": "wait_for_lesson",
+              "taskReferenceName": "wait_for_lesson_2",
+              "description": "Step 2 - Running workflows from code",
+              "inputParameters": {
+                "docLink": "https://orkes.io/content/getting-started/running-workflows-from-code"
+              },
+              "type": "WAIT",
+              "decisionCases": {},
+              "defaultCase": [],
+              "forkTasks": [],
+              "startDelay": 0,
+              "joinOn": [],
+              "optional": false,
+              "defaultExclusiveJoinTask": [],
+              "asyncComplete": false,
+              "loopOver": [],
+              "onStateChange": {}
+            }
+          ],
+          [
+            {
+              "name": "wait_for_lesson",
+              "taskReferenceName": "wait_for_lesson_3",
+              "description": "Step 3 - Adding custom code worker",
+              "inputParameters": {
+                "docLink": "https://orkes.io/content/getting-started/adding-custom-code-worker"
+              },
+              "type": "WAIT",
+              "decisionCases": {},
+              "defaultCase": [],
+              "forkTasks": [],
+              "startDelay": 0,
+              "joinOn": [],
+              "optional": false,
+              "defaultExclusiveJoinTask": [],
+              "asyncComplete": false,
+              "loopOver": [],
+              "onStateChange": {}
+            }
+          ],
+          [
+            {
+              "name": "wait_for_lesson",
+              "taskReferenceName": "wait_for_lesson_4",
+              "description": "Step 4 - Running an inline function",
+              "inputParameters": {
+                "docLink": "https://orkes.io/content/getting-started/running-an-inline-function"
+              },
+              "type": "WAIT",
+              "decisionCases": {},
+              "defaultCase": [],
+              "forkTasks": [],
+              "startDelay": 0,
+              "joinOn": [],
+              "optional": false,
+              "defaultExclusiveJoinTask": [],
+              "asyncComplete": false,
+              "loopOver": [],
+              "onStateChange": {}
+            }
+          ],
+          [
+            {
+              "name": "wait_for_lesson",
+              "taskReferenceName": "wait_for_lesson_5",
+              "description": "Step 5 - Adding wait conditions",
+              "inputParameters": {
+                "docLink": "https://orkes.io/content/getting-started/adding-wait-conditions"
+              },
+              "type": "WAIT",
+              "decisionCases": {},
+              "defaultCase": [],
+              "forkTasks": [],
+              "startDelay": 0,
+              "joinOn": [],
+              "optional": false,
+              "defaultExclusiveJoinTask": [],
+              "asyncComplete": false,
+              "loopOver": [],
+              "onStateChange": {}
+            }
+          ],
+          [
+            {
+              "name": "wait_for_lesson",
+              "taskReferenceName": "wait_for_lesson_6",
+              "description": "Step 6 - Executing tasks in parallel",
+              "inputParameters": {
+                "docLink": "https://orkes.io/content/getting-started/executing-tasks-in-parallel"
+              },
+              "type": "WAIT",
+              "decisionCases": {},
+              "defaultCase": [],
+              "forkTasks": [],
+              "startDelay": 0,
+              "joinOn": [],
+              "optional": false,
+              "defaultExclusiveJoinTask": [],
+              "asyncComplete": false,
+              "loopOver": [],
+              "onStateChange": {}
+            }
+          ]
+        ],
+        "startDelay": 0,
+        "joinOn": [],
+        "optional": false,
+        "defaultExclusiveJoinTask": [],
+        "asyncComplete": false,
+        "loopOver": [],
+        "onStateChange": {}
+      },
+      {
+        "name": "join",
+        "taskReferenceName": "join_ref",
+        "inputParameters": {},
+        "type": "JOIN",
+        "decisionCases": {},
+        "defaultCase": [],
+        "forkTasks": [],
+        "startDelay": 0,
+        "joinOn": [],
+        "optional": false,
+        "defaultExclusiveJoinTask": [],
+        "asyncComplete": false,
+        "loopOver": [],
+        "onStateChange": {}
+      }
+    ],
+    "inputParameters": ["userId"],
+    "outputParameters": {},
+    "failureWorkflow": "",
+    "schemaVersion": 2,
+    "restartable": true,
+    "workflowStatusListenerEnabled": false,
+    "ownerEmail": "gulam.mohiuddeen@orkes.io",
+    "timeoutPolicy": "ALERT_ONLY",
+    "timeoutSeconds": 0,
+    "variables": {},
+    "inputTemplate": {}
+  },
+  {
+    "createTime": 1704437284113,
+    "updateTime": 1703801235742,
+    "name": "new_user_Gulam-1704437257709",
+    "description": "Workflow to run once a new user gets created",
+    "version": 1,
+    "tasks": [
+      {
+        "name": "fork",
+        "taskReferenceName": "fork_ref",
+        "inputParameters": {},
+        "type": "FORK_JOIN",
+        "decisionCases": {},
+        "defaultCase": [],
+        "forkTasks": [
+          [
+            {
+              "name": "start_workflow_user_journey",
+              "taskReferenceName": "start_workflow_user_journey_ref",
+              "inputParameters": {
+                "startWorkflow": {
+                  "name": "user_journeyGulam-1704437257709",
+                  "input": {},
+                  "version": 1,
+                  "correlationId": "user_profile_internal"
+                }
+              },
+              "type": "START_WORKFLOW",
+              "decisionCases": {},
+              "defaultCase": [],
+              "forkTasks": [],
+              "startDelay": 0,
+              "joinOn": [],
+              "optional": false,
+              "defaultExclusiveJoinTask": [],
+              "asyncComplete": false,
+              "loopOver": [],
+              "onStateChange": {}
+            }
+          ]
+        ],
+        "startDelay": 0,
+        "joinOn": [],
+        "optional": false,
+        "defaultExclusiveJoinTask": [],
+        "asyncComplete": false,
+        "loopOver": [],
+        "onStateChange": {}
+      },
+      {
+        "name": "join",
+        "taskReferenceName": "join_ref",
+        "inputParameters": {},
+        "type": "JOIN",
+        "decisionCases": {},
+        "defaultCase": [],
+        "forkTasks": [],
+        "startDelay": 0,
+        "joinOn": [],
+        "optional": false,
+        "defaultExclusiveJoinTask": [],
+        "asyncComplete": false,
+        "loopOver": [],
+        "onStateChange": {}
+      }
+    ],
+    "inputParameters": [],
+    "outputParameters": {
+      "userJourneyExecutionId": "${start_workflow_user_journey_ref.output.workflowId}"
+    },
+    "failureWorkflow": "",
+    "schemaVersion": 2,
+    "restartable": true,
+    "workflowStatusListenerEnabled": false,
+    "ownerEmail": "gulam.mohiuddeen+163@orkes.io",
+    "timeoutPolicy": "ALERT_ONLY",
+    "timeoutSeconds": 0,
+    "variables": {},
+    "inputTemplate": {}
+  }
+]
