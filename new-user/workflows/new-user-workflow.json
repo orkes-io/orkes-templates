@@ -181,8 +181,8 @@
   },
   {
     "createTime": 1704437284113,
-    "updateTime": 1703801235742,
-    "name": "new_user_Gulam-1704437257709",
+    "updateTime": 1713539855777,
+    "name": "new_user_pablo_dot_cuadrado_at_orkes_dot_io",
     "description": "Workflow to run once a new user gets created",
     "version": 1,
     "tasks": [
@@ -200,13 +200,31 @@
               "taskReferenceName": "start_workflow_user_journey_ref",
               "inputParameters": {
                 "startWorkflow": {
-                  "name": "user_journeyGulam-1704437257709",
+                  "name": "user_journeypablo_dot_cuadrado_at_orkes_dot_io",
                   "input": {},
                   "version": 1,
                   "correlationId": "user_profile_internal"
                 }
               },
               "type": "START_WORKFLOW",
+              "decisionCases": {},
+              "defaultCase": [],
+              "forkTasks": [],
+              "startDelay": 0,
+              "joinOn": [],
+              "optional": false,
+              "defaultExclusiveJoinTask": [],
+              "asyncComplete": false,
+              "loopOver": [],
+              "onStateChange": {}
+            }
+          ],
+          [
+            {
+              "name": "wait",
+              "taskReferenceName": "wait_ref",
+              "inputParameters": {},
+              "type": "WAIT",
               "decisionCases": {},
               "defaultCase": [],
               "forkTasks": [],
@@ -253,10 +271,11 @@
     "schemaVersion": 2,
     "restartable": true,
     "workflowStatusListenerEnabled": false,
-    "ownerEmail": "gulam.mohiuddeen+163@orkes.io",
+    "ownerEmail": "pablo.cuadrado@orkes.io",
     "timeoutPolicy": "ALERT_ONLY",
     "timeoutSeconds": 0,
     "variables": {},
     "inputTemplate": {}
   }
+
 ]
