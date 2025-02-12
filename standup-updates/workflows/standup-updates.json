@@ -196,10 +196,10 @@
             "forkTasks": [
               [
                 {
-                  "name": "riza_updates",
-                  "taskReferenceName": "riza_updates",
+                  "name": "john_updates",
+                  "taskReferenceName": "john_updates",
                   "inputParameters": {
-                    "user_name": "Riza",
+                    "user_name": "John Doe",
                     "user_id": "xxxxxxxxxxx"
                   },
                   "type": "SUB_WORKFLOW",
@@ -222,10 +222,10 @@
               ],
               [
                 {
-                  "name": "isabellas_update",
-                  "taskReferenceName": "isabellas_update",
+                  "name": "jane_updates",
+                  "taskReferenceName": "jane_updates",
                   "inputParameters": {
-                    "user_name": "Isabella",
+                    "user_name": "Jane Doe",
                     "user_id": "XXXXXXXXXXX"
                   },
                   "type": "SUB_WORKFLOW",
