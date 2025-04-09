@@ -9,6 +9,7 @@
             {
                 "name": "switch_notify_provider_type",
                 "taskReferenceName": "switch_notify_provider_type_ref",
+                "description": "Route notification based on the specified notification_type (SLACK, SMS, EMAIL, PAGERDUTY).",
                 "inputParameters": {
                     "switchCaseValue": "${workflow.input.notification_type}"
                 },
@@ -18,6 +19,7 @@
                         {
                             "name": "slack_post",
                             "taskReferenceName": "slack_post_ref",
+                            "description": "Send a notification message to Slack via webhook.",
                             "inputParameters": {
                                 "http_request": {
                                     "uri": "${workflow.secrets.orkes_template_slack_webhook}",
@@ -45,6 +47,7 @@
                         {
                             "name": "encode_params",
                             "taskReferenceName": "encode_params_ref",
+                            "description": "URL-encode parameters for the Twilio SMS API request.",
                             "inputParameters": {
                                 "expression": "(function () {\n  return (\"To=\" + encodeURIComponent(\"${workflow.input.notification_to}\")\n    + \"&From=\" + encodeURIComponent(\"${workflow.input.notification_from}\")\n    + \"&Body=\" + encodeURIComponent(\"${workflow.input.notification_message}\"));\n})();",
                                 "evaluatorType": "javascript"
@@ -63,6 +66,7 @@
                         {
                             "name": "sms_twilio",
                             "taskReferenceName": "sms_twilio_ref",
+                            "description": "Send an SMS notification using the Twilio API.",
                             "inputParameters": {
                                 "http_request": {
                                     "uri": "https://api.twilio.com/2010-04-01/Accounts/${workflow.secrets.orkes_template_twillio_account_id}/Messages.json",
@@ -93,6 +97,7 @@
                         {
                             "name": "email_sendgrid",
                             "taskReferenceName": "email_sendgrid_ref",
+                            "description": "Send an email notification using the SendGrid API.",
                             "inputParameters": {
                                 "http_request": {
                                     "uri": "https://api.sendgrid.com/v3/mail/send",
@@ -123,6 +128,7 @@
                         {
                             "name": "notify_pagerduty",
                             "taskReferenceName": "notify_pagerduty_ref",
+                            "description": "Trigger a PagerDuty event notification.",
                             "inputParameters": {
                                 "http_request": {
                                     "uri": "https://events.pagerduty.com/v2/enqueue",
@@ -186,6 +192,7 @@
             {
                 "name": "call_endpoint",
                 "taskReferenceName": "call_endpoint",
+                "description": "Make a GET request to the specified endpoint URL to check its availability.",
                 "inputParameters": {
                     "http_request": {
                         "uri": "${workflow.input.endpoint_url}",
@@ -208,6 +215,7 @@
             {
                 "name": "get_timestamp",
                 "taskReferenceName": "get_timestamp_ref",
+                "description": "Get the current timestamp in ISO format.",
                 "inputParameters": {
                     "expression": "(function () { return new Date().toJSON(); })();",
                     "evaluatorType": "javascript"
@@ -226,6 +234,7 @@
             {
                 "name": "status_code_notify",
                 "taskReferenceName": "status-code-decision",
+                "description": "Check the HTTP status code; trigger notification sub-workflow if not 200.",
                 "inputParameters": {
                     "switchCaseValue": "${call_endpoint.output.response.statusCode}"
                 },
@@ -235,6 +244,7 @@
                         {
                             "name": "notify_channels_sub_workflow",
                             "taskReferenceName": "notify_channels_sub_workflow_ref",
+                            "description": "Run the 'Notify-Channels' sub-workflow to send failure notifications.",
                             "inputParameters": {
                                 "notification_message": "Monitor-HTTP-Endpoint-Availability notification from Orkes Conductor: ${workflow.input.endpoint_url} is down. Timestamp: ${get_timestamp_ref.output.result} .",
                                 "notification_type": "${workflow.input.notification_type}",

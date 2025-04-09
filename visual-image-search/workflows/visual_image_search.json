@@ -3,12 +3,13 @@
     "createTime": 1689697156999,
     "updateTime": 1652207289666,
     "name": "VisualImageSearch",
-    "description": "Visual Image search using Computer Visions and Search APIs",
+    "description": "Visual Image search using Computer Vision and Search APIs",
     "version": 13,
     "tasks": [
       {
         "name": "image_analyze",
         "taskReferenceName": "image_analyze_ref",
+        "description": "Analyze the input image using Azure Cognitive Services Vision API.",
         "inputParameters": {
           "http_request": {
             "uri": "https://orkestestcv.cognitiveservices.azure.com/vision/v3.2/analyze?visualFeatures=Categories,Description&details=Celebrities,Landmarks",
@@ -39,6 +40,7 @@
       {
         "name": "process_payload",
         "taskReferenceName": "process_payload_ref",
+        "description": "Extract tags and captions from the image analysis result using JQ.",
         "inputParameters": {
           "body": "${image_analyze_ref.output.response.body}",
           "queryExpression": "{ tags : .body.description.tags}, { captions: [.body.description.captions[] | .text]}"
@@ -60,6 +62,7 @@
       {
         "name": "fork_join",
         "taskReferenceName": "forkx",
+        "description": "Fork the workflow to extract captions in parallel.",
         "inputParameters": {},
         "type": "FORK_JOIN",
         "decisionCases": {},
@@ -69,6 +72,7 @@
             {
               "name": "extract_caption",
               "taskReferenceName": "extract_caption_ref1",
+              "description": "Extract the first caption from the image analysis result (Branch 1).",
               "inputParameters": {
                 "body": "${image_analyze_ref.output.response.body}",
                 "queryExpression": " [.body.description.captions[] | .text][0]"
@@ -92,6 +96,7 @@
             {
               "name": "extract_caption",
               "taskReferenceName": "extract_caption_ref2",
+              "description": "Extract the first caption from the image analysis result (Branch 2).",
               "inputParameters": {
                 "body": "${image_analyze_ref.output.response.body}",
                 "queryExpression": " [.body.description.captions[] | .text][0]"
@@ -125,6 +130,7 @@
       {
         "name": "join",
         "taskReferenceName": "join2",
+        "description": "Join the parallel caption extraction branches.",
         "inputParameters": {},
         "type": "JOIN",
         "decisionCases": {},
@@ -143,6 +149,7 @@
       {
         "name": "image_search",
         "taskReferenceName": "image_search_ref",
+        "description": "Search for similar images using Bing Image Search based on the extracted caption.",
         "inputParameters": {
           "http_request": {
             "uri": "https://api.bing.microsoft.com/v7.0/images/search?q=${extract_caption_ref1.output.result}",
@@ -170,6 +177,7 @@
       {
         "name": "extract_image_urls",
         "taskReferenceName": "extract_image_urls_ref",
+        "description": "Extract thumbnail URLs from the Bing Image Search results using JQ.",
         "inputParameters": {
           "body": "${image_search_ref.output.response.body}",
           "queryExpression": "{imageUrls : [.body.value[].thumbnailUrl]}"

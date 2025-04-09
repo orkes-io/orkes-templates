@@ -9,6 +9,7 @@
       {
         "name": "image_effects_prefork",
         "taskReferenceName": "image_effects_prefork_ref",
+        "description": "Prepare dynamic tasks and inputs for parallel image processing based on recipes.",
         "inputParameters": {
           "fileLocations": "${workflow.input.fileLocations}",
           "recipeInfos": "${workflow.input.recipeInfos}"
@@ -30,6 +31,7 @@
       {
         "name": "image_effects_fork",
         "taskReferenceName": "image_effects_fork_ref",
+        "description": "Execute the dynamically generated image effect tasks in parallel.",
         "inputParameters": {
           "dynamicTasks": "${image_effects_prefork_ref.output.dynamicTasks}",
           "dynamicTasksInput": "${image_effects_prefork_ref.output.dynamicTasksInput}"
@@ -53,6 +55,7 @@
       {
         "name": "image_effects_join",
         "taskReferenceName": "image_effects_join_ref",
+        "description": "Join the results from the parallel image effect tasks.",
         "inputParameters": {},
         "type": "JOIN",
         "decisionCases": {},
