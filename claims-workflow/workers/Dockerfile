@@ -3,14 +3,22 @@ FROM node:18-slim
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
-
-# Copy source code and run script
-COPY workers/ ./workers/
-COPY run.sh ./
+COPY package*.json yarn.lock ./
 
 # Install dependencies
-RUN npm install
+RUN yarn install
+
+# Copy source files
+COPY index.ts ./
+COPY workers/ ./workers/
+COPY services/ ./services/
+COPY database/ ./database/
+COPY scripts/ ./scripts/
+COPY tsconfig.json ./
+COPY run.sh ./
+
+# Build TypeScript
+RUN yarn build
 
 # Make run.sh executable
 RUN chmod +x run.sh

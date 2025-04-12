@@ -1,11 +1,20 @@
 import 'dotenv/config';
 import Database from 'better-sqlite3';
 import path from 'path';
+import fs from 'fs';
 
 let db: Database.Database;
 
 try {
     const DB_PATH = process.env.DB_PATH || path.join(__dirname, '../../data/policies.db');
+    
+    // Create the directory if it doesn't exist
+    const dbDir = path.dirname(DB_PATH);
+    if (!fs.existsSync(dbDir)) {
+        fs.mkdirSync(dbDir, { recursive: true });
+        console.log(`Created database directory at ${dbDir}`);
+    }
+    
     db = new Database(DB_PATH);
     console.log(`Connected to database at ${DB_PATH}`);
 

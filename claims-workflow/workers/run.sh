@@ -10,12 +10,14 @@ export ORKES_API_KEY_ID
 export ORKES_API_KEY_SECRET
 export ORKES_API_URL
 
-# Check if required Node modules are installed
+# Check if required Node modules are installed and build if needed
 if [ ! -d "node_modules" ]; then
     echo "Installing dependencies..."
-    npm install
+    yarn install
+    echo "Building TypeScript..."
+    yarn build
 fi
 
 # Run the workers
 echo "Starting Conductor workers..."
-npx ts-node workers/index.ts 
+node dist/index.js 
