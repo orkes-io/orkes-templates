@@ -1,0 +1,106 @@
+{
+    "createTime": 1742230294084,
+    "updateTime": 1742230715069,
+    "createdBy": "USER:james.stuart@orkes.io",
+    "updatedBy": "USER:james.stuart@orkes.io",
+    "name": "assesor_report",
+    "version": 1,
+    "jsonSchema": {
+      "properties": {
+        "visible_assesments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "damage_visiable": {
+                "type": "boolean"
+              },
+              "damage_type": {
+                "type": "string",
+                "enum": [
+                  "Side collision Damage",
+                  "Minor front door damage",
+                  "Windshield Damage"
+                ]
+              },
+              "coverage_determination": {
+                "type": "string",
+                "enum": [
+                  "Covered",
+                  "Not Covered"
+                ]
+              },
+              "coverage_score": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "field_description_text_luo5agk13g": {
+          "type": "string"
+        },
+        "overall_coverage": {
+          "type": "string",
+          "enum": [
+            "Partially Covered",
+            "Full Coverage",
+            "Not Covered"
+          ]
+        },
+        "rationale": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "templateUI": {
+      "type": "VerticalLayout",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/visible_assesments"
+        },
+        {
+          "type": "VerticalLayout",
+          "elements": [
+            {
+              "type": "Control",
+              "scope": "#/properties/field_description_text_luo5agk13g",
+              "label": "Overall Determination",
+              "options": {
+                "multi": true,
+                "readonly": true,
+                "display": "description-text"
+              }
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/overall_coverage",
+              "label": "Overall Coverage",
+              "options": {}
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/rationale",
+              "label": "Rationale"
+            }
+          ]
+        },
+        {
+          "type": "VerticalLayout",
+          "elements": [
+            {
+              "type": "Control",
+              "scope": "#/properties/notes",
+              "label": "Notes",
+              "options": {
+                "multi": true
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }

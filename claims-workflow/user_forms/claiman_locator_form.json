@@ -1,0 +1,81 @@
+{
+  "createTime": 1741979242314,
+  "updateTime": 1742219514084,
+  "createdBy": "USER:james.stuart@orkes.io",
+  "updatedBy": "USER:james.stuart@orkes.io",
+  "name": "claimant_locator_form",
+  "version": 1,
+  "jsonSchema": {
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "properties": {
+      "incident_city": {
+        "type": "string"
+      },
+      "incident_street": {
+        "type": "string"
+      },
+      "state": {
+        "type": "string",
+        "enum": [
+          "CA",
+          "MIA",
+          "NY"
+        ]
+      },
+      "policy_picker": {
+        "type": "string",
+        "oneOf": "${policyValues}"
+      },
+      "incident_description": {
+        "type": "string"
+      }
+    }
+  },
+  "templateUI": {
+    "type": "VerticalLayout",
+    "elements": [
+      {
+        "type": "HorizontalLayout",
+        "elements": [
+          {
+            "type": "VerticalLayout",
+            "elements": [
+              {
+                "type": "Control",
+                "scope": "#/properties/incident_city",
+                "label": "City"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/incident_street",
+                "label": "Street"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/state",
+                "label": "State",
+                "options": {}
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Control",
+        "scope": "#/properties/policy_picker",
+        "label": "Policy Picker",
+        "options": {
+          "autocomplete": true
+        }
+      },
+      {
+        "type": "Control",
+        "scope": "#/properties/incident_description",
+        "label": "Description",
+        "options": {
+          "multi": true
+        }
+      }
+    ]
+  }
+}
