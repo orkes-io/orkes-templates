@@ -1,4 +1,4 @@
-{
+[ {
   "createTime": 1741976169710,
   "updateTime": 1742422661242,
   "name": "insurance_claim",
@@ -363,4 +363,4 @@
   "variables": {},
   "inputTemplate": {},
   "enforceSchema": true
-}
+} ]
