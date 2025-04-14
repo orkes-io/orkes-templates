@@ -1,0 +1,17 @@
+# Ignore environment files
+.env
+.env.*
+!.env.sample
+
+# Ignore node_modules (dependencies will be installed in the image)
+node_modules
+
+# Ignore build artifacts if they exist locally (should be built in image)
+dist
+
+# Ignore git files
+.git
+.gitignore
+
+# Ignore OS-specific files
+.DS_Store

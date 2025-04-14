@@ -1,0 +1,16 @@
+services:
+  claims-worker:
+    build:
+      context: . # Use the current directory for build context
+      dockerfile: Dockerfile # Specify the Dockerfile name
+    container_name: claims_worker_service # Optional: Define a specific container name
+    environment: # Get all the environment variables from the local env, not a .env file
+                 # Look at .env.sample for the required variables and how to fill them
+      - ORKES_API_KEY_ID=${ORKES_API_KEY_ID}
+      - ORKES_API_KEY_SECRET=${ORKES_API_KEY_SECRET}
+      - ORKES_API_URL=${ORKES_API_URL}
+      - DB_PATH=${DB_PATH}
+    volumes:
+      - ./data:/data # Mount a volume for persistent data storage
+
+    restart: unless-stopped # Optional: Define restart policy
