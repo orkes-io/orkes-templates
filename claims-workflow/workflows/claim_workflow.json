@@ -29,7 +29,7 @@
     {
       "name": "map_policies_to_menu_items",
       "taskReferenceName": "map_policies_to_menu_items_ref",
-      "description": "Transform the list of policies into a format suitable for a dropdown menu (const/title pairs).",
+      "description": "Transform the list of policies into a format suitable for a dropdown menu.",
       "inputParameters": {
         "expression": "(function () {\n  return $.policies.map(p => ({\n    \"const\": p.policy_number,\n    title: p.policy_type\n  }));\n})();",
         "evaluatorType": "graaljs",
@@ -51,7 +51,7 @@
     {
       "name": "human",
       "taskReferenceName": "take_claim_ref",
-      "description": "Present a form (claimant_locator_form) to the user to collect initial claim details and select the relevant policy.",
+      "description": "Present the claimant_locator_form to the user to collect initial claim details and select the relevant policy.",
       "inputParameters": {
         "__humanTaskDefinition": {
           "assignmentCompletionStrategy": "LEAVE_OPEN",
@@ -110,7 +110,7 @@
           {
             "name": "human",
             "taskReferenceName": "assesor_findings_ref",
-            "description": "Present a form (assesor_report) to a human assessor to input findings about the claim.",
+            "description": "Present the assesor_report form to a human assessor, to input findings about the claim.",
             "inputParameters": {
               "__humanTaskDefinition": {
                 "assignmentCompletionStrategy": "LEAVE_OPEN",
@@ -138,7 +138,7 @@
           {
             "name": "incident_covered_by_policy",
             "taskReferenceName": "incident_covered_by_policy_ref",
-            "description": "Evaluate if the incident, based on the assessor's findings, is covered by the policy.",
+            "description": " Based on the assessor's findings, evaluate if the incident is covered by the policy.",
             "inputParameters": {
               "overall_coverage": "${assesor_findings_ref.output.overall_coverage}"
             },
