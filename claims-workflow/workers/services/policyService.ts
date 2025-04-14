@@ -181,19 +181,19 @@ export const createFakeCustomerPolicies = () => {
     try {
         // Insert customers
         const customerStmt = db.prepare(`
-            INSERT INTO customers (customer_id, first_name, last_name, email, phone)
+            INSERT OR IGNORE INTO customers (customer_id, first_name, last_name, email, phone)
             VALUES (@customer_id, @first_name, @last_name, @email, @phone)
         `);
 
         // Insert policies
         const policyStmt = db.prepare(`
-            INSERT INTO policies (customer_id, policy_number, policy_type, status)
+            INSERT OR IGNORE  INTO policies (customer_id, policy_number, policy_type, status)
             VALUES (@customer_id, @policy_number, @policy_type, @status)
         `);
 
         // Insert claims
         const claimStmt = db.prepare(`
-            INSERT INTO claims (claim_number, policy_id, customer_id, description, status, amount, incident_date)
+            INSERT OR IGNORE  INTO claims (claim_number, policy_id, customer_id, description, status, amount, incident_date)
             VALUES (@claim_number, @policy_id, @customer_id, @description, @status, @amount, @incident_date)
         `);
 
