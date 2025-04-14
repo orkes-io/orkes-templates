@@ -8,6 +8,7 @@
     {
       "name": "findPolicyForCustomer",
       "taskReferenceName": "findPolicyForCustomer_ref",
+      "description": "Find insurance policies associated with the customer's first and last name.",
       "inputParameters": {
         "firstName": "Jane",
         "lastName": "Smith"
@@ -28,6 +29,7 @@
     {
       "name": "map_policies_to_menu_items",
       "taskReferenceName": "map_policies_to_menu_items_ref",
+      "description": "Transform the list of policies into a format suitable for a dropdown menu (const/title pairs).",
       "inputParameters": {
         "expression": "(function () {\n  return $.policies.map(p => ({\n    \"const\": p.policy_number,\n    title: p.policy_type\n  }));\n})();",
         "evaluatorType": "graaljs",
@@ -49,6 +51,7 @@
     {
       "name": "human",
       "taskReferenceName": "take_claim_ref",
+      "description": "Present a form (claimant_locator_form) to the user to collect initial claim details and select the relevant policy.",
       "inputParameters": {
         "__humanTaskDefinition": {
           "assignmentCompletionStrategy": "LEAVE_OPEN",
@@ -76,6 +79,7 @@
     {
       "name": "policy_valid",
       "taskReferenceName": "policy_valid_ref",
+      "description": "Check if a valid policy was selected by the user in the previous step.",
       "inputParameters": {
         "claim_details": "${take_claim_ref.output}"
       },
@@ -85,6 +89,7 @@
           {
             "name": "createClaimForPolicy",
             "taskReferenceName": "createClaimForPolicy_ref",
+            "description": "Create a new claim record associated with the selected policy ID and incident description.",
             "inputParameters": {
               "policyId": "${take_claim_ref.output.policy_picker}",
               "description": "${take_claim_ref.output.incident_description}"
@@ -105,6 +110,7 @@
           {
             "name": "human",
             "taskReferenceName": "assesor_findings_ref",
+            "description": "Present a form (assesor_report) to a human assessor to input findings about the claim.",
             "inputParameters": {
               "__humanTaskDefinition": {
                 "assignmentCompletionStrategy": "LEAVE_OPEN",
@@ -132,6 +138,7 @@
           {
             "name": "incident_covered_by_policy",
             "taskReferenceName": "incident_covered_by_policy_ref",
+            "description": "Evaluate if the incident, based on the assessor's findings, is covered by the policy.",
             "inputParameters": {
               "overall_coverage": "${assesor_findings_ref.output.overall_coverage}"
             },
@@ -141,6 +148,7 @@
                 {
                   "name": "determine_price_of_damage",
                   "taskReferenceName": "determine_price_of_damage_ref",
+                  "description": "Calculate the total estimated damage cost, covered cost, and non-covered cost based on assessor findings.",
                   "inputParameters": {
                     "expression": "(function () {\n  const costMap = {\n    \"Side collision Damage\": 2500,\n    \"Minor front door damage\": 500,\n    \"Windshield Damage\": 1000\n  }\n\n  const items = $.assesor_findings.map(va => {\n    //\n    const estimated_cost = costMap[va.get(\"damage_type\")]\n    return ({\n      description: va.get(\"damage_type\"),\n      estimated_cost,\n      coverage: va.get(\"coverage_determination\"),\n      covered_percentage: va.get(\"coverage_score\")\n    })\n  });\n\n  const totalCost = items.reduce((acc, { estimated_cost, coverage,covered_percentage }) => {\n    const total_damage_cost = acc.total_damage_cost + estimated_cost;\n    if (coverage === \"Not covered\") {\n      const total_non_covered_cost = acc.total_non_covered_cost + estimated_cost\n      return ({\n        total_covered_cost: acc.total_covered_cost,\n        total_non_covered_cost,\n        total_damage_cost\n      })\n\n    }\n    const vaPercent = Number(covered_percentage) / 100;\n    const totalToPay = estimated_cost * vaPercent;\n    const total_covered_cost = acc.total_covered_cost + totalToPay;\n\n\n    return ({\n      total_covered_cost,\n      total_non_covered_cost: acc.total_non_covered_cost,\n      total_damage_cost\n    })\n  }, { total_covered_cost: 0, total_non_covered_cost: 0, total_damage_cost: 0 });\n\n  return {\n    \"damage_estimation\": {\n      \"total_damage_cost\": totalCost.total_damage_cost,\n      \"items\": items\n    },\n    \"coverage_calculation\": {\n      \"total_covered_cost\": totalCost.total_covered_cost,\n      \"total_non_covered_cost\": totalCost.total_non_covered_cost,\n      \"explanation\": $.asessor_rationale\n    }\n  }\n\n})();",
                     "evaluatorType": "graaljs",
@@ -163,6 +171,7 @@
                 {
                   "name": "exceed_cost",
                   "taskReferenceName": "exceed_cost_ref",
+                  "description": "Check if the calculated total covered cost exceeds a predefined threshold (e.g., $100).",
                   "inputParameters": {
                     "totalCost": "${determine_price_of_damage_ref.output.result.coverage_calculation.total_covered_cost}"
                   },
@@ -172,6 +181,7 @@
                       {
                         "name": "human",
                         "taskReferenceName": "investigation_human_ref",
+                        "description": "Present a form (on_site_investigation) to a human investigator for on-site details if the cost exceeds the threshold.",
                         "inputParameters": {
                           "__humanTaskDefinition": {
                             "assignmentCompletionStrategy": "LEAVE_OPEN",
@@ -202,6 +212,7 @@
                       {
                         "name": "after_investigation_is_it_covered",
                         "taskReferenceName": "after_investigation_is_it_covered_ref",
+                        "description": "Re-evaluate coverage based on the on-site investigation findings.",
                         "inputParameters": {
                           "switchCaseValue": "${incident_covered_by_policy_ref.output.covered}"
                         },
@@ -213,6 +224,7 @@
                           {
                             "name": "terminate",
                             "taskReferenceName": "terminate_ref",
+                            "description": "Terminate the workflow because the incident was not covered after investigation.",
                             "inputParameters": {
                               "terminationStatus": "TERMINATED",
                               "terminationReason": "Terminated after investigation.Incident not covered"
@@ -261,6 +273,7 @@
                 {
                   "name": "terminate_2",
                   "taskReferenceName": "terminate_ref_2",
+                  "description": "Terminate the workflow successfully, indicating payment should be sent to the client.",
                   "inputParameters": {
                     "terminationStatus": "COMPLETED",
                     "terminationReason": "Send Payment to client"
@@ -284,6 +297,7 @@
               {
                 "name": "terminate_1",
                 "taskReferenceName": "terminate_ref_1",
+                "description": "Terminate the workflow because the policy does not cover the incident based on initial assessment.",
                 "inputParameters": {
                   "terminationStatus": "TERMINATED",
                   "terminationReason": "Policy does not cover incident"
@@ -320,6 +334,7 @@
         {
           "name": "terminate_by_invalid_policy",
           "taskReferenceName": "terminate_by_invalid_policy_ref",
+          "description": "Terminate the workflow because the user did not select a valid policy.",
           "inputParameters": {
             "terminationStatus": "TERMINATED",
             "terminationReason": "Terminated because of invalid policy"
