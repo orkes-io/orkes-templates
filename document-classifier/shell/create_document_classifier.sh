@@ -1,22 +1,36 @@
 #!/bin/bash
+set -euo pipefail
+
 echo ">>> Starting the creation of the Document Classifier Application..."
 # Global variables
 workflow_template_URL="https://raw.githubusercontent.com/orkes-io/orkes-templates/main/document-classifier/workflows/document-classifier.json"
 prompt_text_URL="https://raw.githubusercontent.com/orkes-io/orkes-templates/main/document-classifier/prompts/classify-document.prompt"
-current_time=$(date +%s%3)
-document_classifier_input="https://image-processing-orkes.s3.amazonaws.com/test-w2-form-full-text.pdf"
-openai_integ_model_name="gpt-3.5-turbo"
-CONDUCTOR_SERVER_API_URL=${CONDUCTOR_SERVER_API_URL:-"https://play.orkes.io/api"}
+current_time=$(date +%s)
+document_classifier_input="https://pub-content-orkes.s3.us-east-2.amazonaws.com/test-w2-form-full-text.pdf"
+openai_integ_model_name="gpt-4.1"
+CONDUCTOR_SERVER_API_URL=${CONDUCTOR_SERVER_API_URL:-"https://developer.orkescloud.com/api"}
+
+echo ">>> Checking required tools..."
+# Check for required tools
+if ! command -v curl &> /dev/null; then
+    echo "Error: curl is not installed"
+    exit 1
+fi
+
+if ! command -v jq &> /dev/null; then
+    echo "Error: jq is not installed"
+    exit 1
+fi
 
 echo ">>> Confirming all the required environment variables are set..."
 # Check for required environment variables
-if [[ -z "$CONDUCTOR_ACCESS_TOKEN" && (-z "$CONDUCTOR_KEY" || -z "$CONDUCTOR_SECRET") ]]; then
+if [[ -z "${CONDUCTOR_ACCESS_TOKEN:-}" && (-z "${CONDUCTOR_KEY:-}" || -z "${CONDUCTOR_SECRET:-}") ]]; then
     echo "Error: CONDUCTOR_ACCESS_TOKEN or both CONDUCTOR_KEY and CONDUCTOR_SECRET must be set"
     exit 1
 fi
 
-if [ -z "$OPEN_AI_KEY" ]; then
-    echo "Error: OPEN_AI_KEY must be set"
+if [ -z "${OPENAI_API_KEY:-}" ]; then
+    echo "Error: OPENAI_API_KEY must be set"
     exit 1
 fi
 
@@ -30,15 +44,18 @@ fi
 
 echo ">>> Obtaining user information..."
 # Set the token
-if [ ! -z "$CONDUCTOR_ACCESS_TOKEN" ]; then
+if [ -n "${CONDUCTOR_ACCESS_TOKEN:-}" ]; then
     user_info=$(curl -s -X 'GET' \
         "$CONDUCTOR_SERVER_API_URL/token/userInfo" \
         -H "X-Authorization: $CONDUCTOR_ACCESS_TOKEN")
 
+    if [ -z "$user_info" ]; then
+        echo "Error: Failed to retrieve user information"
+        exit 1
+    fi
 
-    
-    user_name=$(echo "$user_info" | jq -r '.name' | sed 's/ /_/g')
-    user_id=$(echo "$user_info" | jq -r '.id' | sed 's/ /_/g')
+    user_name=$(echo "$user_info" | jq -r '.name' | tr ' ' '_' | tr -cd '[:alnum:]_-')
+    user_id=$(echo "$user_info" | jq -r '.id' | tr ' ' '_' | tr -cd '[:alnum:]_-@.')
     token=$CONDUCTOR_ACCESS_TOKEN
 else
     token_response=$(curl -s -X 'POST' \
@@ -52,14 +69,22 @@ else
  
     
     token=$(echo "$token_response" | jq -r '.token')
-    if [ ! -z "$token" ]; then
-    user_info=$(curl -s -X 'GET' \
-        "$CONDUCTOR_SERVER_API_URL/token/userInfo" \
-        -H "X-Authorization: $token")
+    if [ -n "$token" ]; then
+        user_info=$(curl -s -X 'GET' \
+            "$CONDUCTOR_SERVER_API_URL/token/userInfo" \
+            -H "X-Authorization: $token")
+    else
+        echo "Error: Failed to obtain authentication token"
+        exit 1
     fi
 
-    user_name=$(echo "$user_info" | jq -r '.name' | sed 's/ /_/g')
-    user_id=$(echo "$user_info" | jq -r '.id' | sed 's/ /_/g')
+    if [ -z "$user_info" ]; then
+        echo "Error: Failed to retrieve user information"
+        exit 1
+    fi
+
+    user_name=$(echo "$user_info" | jq -r '.name' | tr ' ' '_' | tr -cd '[:alnum:]_-')
+    user_id=$(echo "$user_info" | jq -r '.id' | tr ' ' '_' | tr -cd '[:alnum:]_-@.')
 fi
 
 echo ">>> Hello $user_name / $user_id <<<"
@@ -70,7 +95,7 @@ openai_integ_name="openai_${user_name}_${current_time}"
 openai_integ_params='{
   "category": "AI_MODEL",
   "configuration": {
-    "api_key": "'"${OPEN_AI_KEY}"'"
+    "api_key": "'"${OPENAI_API_KEY}"'"
   },
   "description": "This is an OpenAI integration created by '"${user_name}"' / '"${user_id}"' at time: '"${current_time}"'",
   "enabled": true,
@@ -83,7 +108,12 @@ openai_integ_response=$(curl -s -X 'POST' \
     -H 'Content-Type: application/json' \
     -d "$openai_integ_params")
 
-# Add LLM model to integrationn
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to create OpenAI integration"
+    exit 1
+fi
+
+# Add LLM model to integration
 echo ">>> Adding model to the integration..."
 openai_integ_model_params='{
   "configuration": {},
@@ -97,12 +127,22 @@ openai_integ_model_response=$(curl -s -X 'POST' \
     -H 'Content-Type: application/json' \
     -d "$openai_integ_model_params")
 
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to add model to integration"
+    exit 1
+fi
+
 # Add an AI prompt
 echo ">>> Creating the AI prompt to be used for this application..."
 ai_prompt_name="document_classification_prompt_${user_name}_${current_time}"
 ai_prompt_description=$(echo "This is a prompt to classify documents and is created using the Orkes quick start script" | jq -sRr @uri)
 ai_prompt_model_association=$(echo "${openai_integ_name}:${openai_integ_model_name}" | jq -sRr @uri)
 ai_prompt_text=$(curl -s "$prompt_text_URL")
+
+if [ -z "$ai_prompt_text" ]; then
+    echo "Error: Failed to fetch prompt text from URL"
+    exit 1
+fi
 
 prompt_response=$(curl -s -X 'POST' \
     "$CONDUCTOR_SERVER_API_URL/prompts/$ai_prompt_name?description=$ai_prompt_description&models=$ai_prompt_model_association" \
@@ -111,12 +151,23 @@ prompt_response=$(curl -s -X 'POST' \
     -H 'Content-Type: application/json' \
     -d "$ai_prompt_text")
 
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to create AI prompt"
+    exit 1
+fi
+
 
 # Create workflow
 echo ">>> Creating the workflow for this application using the integration and prompt that were created..."
 workflow_definition=$(curl -s "$workflow_template_URL" | jq -r '.[0]')
+
+if [ -z "$workflow_definition" ] || [ "$workflow_definition" = "null" ]; then
+    echo "Error: Failed to fetch workflow template from URL"
+    exit 1
+fi
+
 extracted_name=$(echo "$workflow_definition" | jq -r '.name')
-processed_name=$(echo "$extracted_name" | sed "s/ /_/g")
+processed_name=$(echo "$extracted_name" | tr ' ' '_' | tr -cd '[:alnum:]_-')
 workflow_definition_name="${processed_name}_${user_name}_${current_time}"
 
 workflow_definition=$(echo "$workflow_definition" | \
@@ -136,6 +187,10 @@ workflow_response=$(curl -s -X 'POST' \
     -H 'Content-Type: application/json' \
     -d "$workflow_definition")
 
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to create workflow"
+    exit 1
+fi
 
 CONDUCTOR_SERVER_URL=${CONDUCTOR_SERVER_API_URL%/api}
 
@@ -156,7 +211,7 @@ echo ""
 
 # Call the workflow
 echo ">>> Calling the execution of the $workflow_definition_name workflow..."
-workflow_execution_id=$(curl  -s -X 'POST' \
+workflow_execution_response=$(curl  -s -X 'POST' \
     "$CONDUCTOR_SERVER_API_URL/workflow/$workflow_definition_name?priority=0" \
     -H 'accept: text/plain' \
     -H "X-Authorization: $token" \
@@ -165,13 +220,23 @@ workflow_execution_id=$(curl  -s -X 'POST' \
     "document_url": "'"$document_classifier_input"'"
 }')
 
+if [ $? -ne 0 ] || [ -z "$workflow_execution_response" ]; then
+    echo "Error: Failed to execute workflow"
+    exit 1
+fi
 
+# Check if response is an error (contains "status" field indicating an error response)
+if echo "$workflow_execution_response" | jq -e '.status' > /dev/null 2>&1; then
+    echo "Error: Workflow execution failed with response:"
+    echo "$workflow_execution_response" | jq '.'
+    exit 1
+fi
 
+workflow_execution_id="$workflow_execution_response"
 
 # Display execution message
 echo ">>> Here is the execution view of your application. Follow this link to visually see the status and the results: $CONDUCTOR_SERVER_URL/execution/$workflow_execution_id"
 echo ">>> Checking the status of the execution..."
-#!/bin/bash
 
 # Initialize start time and timeout
 start_time=$(date +%s)
@@ -187,7 +252,7 @@ while [ $(($(date +%s) - start_time)) -lt $timeout ]; do
 
 
     # Extract the status from the response
-    status=$(echo $response | jq -r '.status')
+    status=$(echo "$response" | jq -r '.status')
 
     # Check if status is COMPLETED
     if [ "$status" = "COMPLETED" ]; then
