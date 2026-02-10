@@ -7,6 +7,7 @@
           {
             "name": "send_welcome_message",
             "taskReferenceName": "send_welcome_message",
+            "description": "Send a welcome message via Slack to the user requesting their standup update.",
             "inputParameters": {
               "user_name": "${workflow.input.user_name}",
               "http_request": {
@@ -39,6 +40,7 @@
           {
             "name": "loopTask",
             "taskReferenceName": "loopTask",
+            "description": "Loop until the user sends 'done', waiting for their Slack messages.",
             "inputParameters": {
               "value": "${workflow.input.loop}"
             },
@@ -56,6 +58,7 @@
               {
                 "name": "webhook_task",
                 "taskReferenceName": "webhook_task",
+                "description": "Wait for a Slack message event from the specified user.",
                 "inputParameters": {
                   "user_id": "${workflow.input.user_id}",
                   "matches": {
@@ -81,6 +84,7 @@
           {
             "name": "jq_aggregate_updates",
             "taskReferenceName": "jq_aggregate_updates",
+            "description": "Aggregate all user messages (excluding 'done' and welcome) using JQ.",
             "inputParameters": {
               "updates": "${loopTask.output}",
               "queryExpression": ".updates | to_entries | .[] | select(.key != \"iteration\") | .value | .webhook_task.event.text | select(. != \"done\") | select (. | startswith(\"Hello\") | not)"
@@ -100,6 +104,7 @@
           {
             "name": "jq_convert_to_string",
             "taskReferenceName": "jq_convert_to_string",
+            "description": "Convert the aggregated list of updates into a single comma-separated string using JQ.",
             "inputParameters": {
               "updates": "${jq_aggregate_updates.output.resultList}",
               "queryExpression": ".updates | join(\",\")"
@@ -119,6 +124,7 @@
           {
             "name": "append_user_name",
             "taskReferenceName": "append_user_name",
+            "description": "Prepend the user's name to the aggregated update string using JQ.",
             "inputParameters": {
               "user_name": "${workflow.input.user_name}",
               "updates": "${jq_convert_to_string.output}",
@@ -139,6 +145,7 @@
           {
             "name": "post_updates",
             "taskReferenceName": "post_updates",
+            "description": "Post the final formatted standup update to the designated Slack channel.",
             "inputParameters": {
               "http_request": {
                 "uri": "${workflow.secrets.slack_conductor_channel_url}",
@@ -189,6 +196,7 @@
           {
             "name": "fork",
             "taskReferenceName": "fork",
+            "description": "Fork the workflow to collect updates from multiple users in parallel.",
             "inputParameters": {},
             "type": "FORK_JOIN",
             "decisionCases": {},
@@ -198,6 +206,7 @@
                 {
                   "name": "john_updates",
                   "taskReferenceName": "john_updates",
+                  "description": "Run the 'individual_updates' sub-workflow for John Doe.",
                   "inputParameters": {
                     "user_name": "John Doe",
                     "user_id": "xxxxxxxxxxx"
@@ -224,6 +233,7 @@
                 {
                   "name": "jane_updates",
                   "taskReferenceName": "jane_updates",
+                  "description": "Run the 'individual_updates' sub-workflow for Jane Doe.",
                   "inputParameters": {
                     "user_name": "Jane Doe",
                     "user_id": "XXXXXXXXXXX"
@@ -256,6 +266,7 @@
           {
             "name": "join",
             "taskReferenceName": "join",
+            "description": "Join the parallel branches collecting individual user updates.",
             "inputParameters": {},
             "type": "JOIN",
             "decisionCases": {},

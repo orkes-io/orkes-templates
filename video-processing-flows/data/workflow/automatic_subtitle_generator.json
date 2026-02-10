@@ -9,6 +9,7 @@
       {
         "name": "split_video",
         "taskReferenceName": "split_video_ref",
+        "description": "Split the input video into smaller segments of specified duration.",
         "inputParameters": {
           "fileLocation": "${workflow.input.fileLocation}",
           "outputFileNamePrefix": "${workflow.input.outputFileNamePrefix}",
@@ -31,6 +32,7 @@
       {
         "name": "split_files_transform",
         "taskReferenceName": "split_files_transform_ref",
+        "description": "Transform the list of split video files into the input format required for the dynamic fork.",
         "inputParameters": {
           "queryExpression": ".body | to_entries | map({\"dataIndex\": .key, \"fileLocation\":.value, \"open_api_key\": \"${workflow.secrets.openai_api_key}\"})\n",
           "body": "${split_video_ref.output.splitFiles}"
@@ -52,6 +54,7 @@
       {
         "name": "transcribe_dynamic_fork",
         "taskReferenceName": "transcribe_dynamic_fork_ref",
+        "description": "Dynamically fork transcription tasks for each video segment.",
         "inputParameters": {
           "forkTaskName": "transcribe",
           "forkTaskInputs": "${split_files_transform_ref.output.result}"
@@ -75,6 +78,7 @@
       {
         "name": "transcribe_join",
         "taskReferenceName": "transcribe_join_ref",
+        "description": "Join the results from the parallel transcription tasks.",
         "inputParameters": {},
         "type": "JOIN",
         "decisionCases": {},
@@ -93,6 +97,7 @@
       {
         "name": "transcribe_join_transform",
         "taskReferenceName": "transcribe_join_transform_ref",
+        "description": "Transform and sort the joined transcription results by their original segment index.",
         "inputParameters": {
           "queryExpression": ".body | to_entries | map({\"dataIndex\": .value.dataIndex, \"fileLocation\":.value.fileLocation, \"subtitleFileUrl\":.value.subtitleFileUrl, \"videoFileWithSubtitlesUrl\" : .value.videoFileWithSubtitlesUrl}) | sort_by(.dataIndex)\n",
           "body": "${transcribe_join_ref.output}"
@@ -114,6 +119,7 @@
       {
         "name": "merge_video_subtitles",
         "taskReferenceName": "merge_video_subtitles_ref",
+        "description": "Merge the generated subtitle files and optionally the video segments back into a single output file.",
         "inputParameters": {
           "files_to_merge": "${transcribe_join_transform_ref.output.result}",
           "outputFileFormat": "${workflow.input.outputFileFormat}",

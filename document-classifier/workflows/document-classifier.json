@@ -9,6 +9,7 @@
       {
         "name": "check_for_pdf",
         "taskReferenceName": "check_for_pdf_ref",
+        "description": "Check if the input document URL points to a PDF file.",
         "inputParameters": {
           "url": "${workflow.input.document_url}"
         },
@@ -18,6 +19,7 @@
             {
               "name": "get_document_task",
               "taskReferenceName": "get_document_task_ref",
+              "description": "Download the PDF document from the provided URL.",
               "inputParameters": {
                 "url": "${workflow.input.document_url}",
                 "mediaType": "application/pdf"
@@ -40,6 +42,7 @@
           {
             "name": "generate_error",
             "taskReferenceName": "generate_error_ref",
+            "description": "Generate an error message for unsupported file types.",
             "inputParameters": {
               "expression": "(function(){ \n\n  return \"The filename supplied: \" + $.filename + \" is an unsupported file type. Please try again with a .pdf file\";\n})();",
               "evaluatorType": "graaljs",
@@ -60,6 +63,7 @@
           {
             "name": "terminate_task",
             "taskReferenceName": "terminate_task_ref",
+            "description": "Terminate the workflow due to an unsupported file type.",
             "inputParameters": {
               "terminationStatus": "TERMINATED",
               "terminationReason": "Unsupported file type",
@@ -94,6 +98,7 @@
       {
         "name": "classify_using_llm",
         "taskReferenceName": "classify_using_llm",
+        "description": "Classify the document content using an LLM.",
         "inputParameters": {
           "promptName": "doc_classifier_prompt",
           "promptVariables": {
@@ -117,6 +122,7 @@
       {
         "name": "extract_classification",
         "taskReferenceName": "extract_classification",
+        "description": "Extract and format the classification result from the LLM output.",
         "inputParameters": {
           "expression": "(function(){ \n  let llmResult = new String($.llmResult).trim();\n  if(llmResult === 'NO_MATCH') {\n    return \"This document couldn't be classified by the LLM\";\n  }\n  return \"LLM classified this document as: \" + llmResult;\n})();",
           "evaluatorType": "graaljs",

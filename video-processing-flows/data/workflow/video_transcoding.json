@@ -9,6 +9,7 @@
       {
         "name": "video_recipes_prefork",
         "taskReferenceName": "video_recipes_prefork_ref",
+        "description": "Prepare dynamic tasks and inputs for parallel video transcoding based on recipes.",
         "inputParameters": {
           "fileLocations": "${workflow.input.fileLocations}",
           "recipeInfos": "${workflow.input.recipeInfos}"
@@ -30,6 +31,7 @@
       {
         "name": "video_recipes_fork",
         "taskReferenceName": "video_recipes_fork_ref",
+        "description": "Execute the dynamically generated video transcoding tasks in parallel.",
         "inputParameters": {
           "dynamicTasks": "${video_recipes_prefork_ref.output.dynamicTasks}",
           "dynamicTasksInput": "${video_recipes_prefork_ref.output.dynamicTasksInput}"
@@ -53,6 +55,7 @@
       {
         "name": "video_recipes_join",
         "taskReferenceName": "video_recipes_join_ref",
+        "description": "Join the results from the parallel video transcoding tasks.",
         "inputParameters": {},
         "type": "JOIN",
         "decisionCases": {},
@@ -94,6 +97,7 @@
       {
         "name": "video_recipes_prefork",
         "taskReferenceName": "video_recipes_prefork_ref",
+        "description": "Prepare dynamic tasks and inputs for parallel video processing based on recipes.",
         "inputParameters": {
           "fileLocations" : "${workflow.input.fileLocations}",
           "recipeInfos": "${workflow.input.recipeInfos}"
@@ -103,6 +107,7 @@
       {
         "name": "video_recipes_fork",
         "taskReferenceName": "video_recipes_fork_ref",
+        "description": "Execute the dynamically generated video recipe tasks in parallel.",
         "inputParameters": {
           "dynamicTasks": "${video_recipes_prefork_ref.output.dynamicTasks}",
           "dynamicTasksInput": "${video_recipes_prefork_ref.output.dynamicTasksInput}"
@@ -115,6 +120,7 @@
       {
         "name": "video_recipes_join",
         "taskReferenceName": "video_recipes_join_ref",
+        "description": "Join the results from the parallel video recipe tasks.",
         "inputParameters": {},
         "type": "JOIN",
         "decisionCases": {},

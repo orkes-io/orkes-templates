@@ -7,6 +7,7 @@
     {
       "name": "generate_thumbnails",
       "taskReferenceName": "generate_thumbnails_ref",
+      "description": "Generate thumbnails for the input video file.",
       "inputParameters": {
         "outputFileFormat": "${workflow.input.outputFileFormat}",
         "fileLocation": "${workflow.input.fileLocation}"
